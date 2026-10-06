@@ -1,0 +1,711 @@
+/* ==========================================================================
+   QUILL REUSABLE COMPONENT STYLES
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. BUTTON SYSTEM
+   -------------------------------------------------------------------------- */
+.quill-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font-family: var(--font-sans);
+  font-size: var(--text-size-btn);
+  font-weight: var(--weight-medium);
+  min-height: 44px;
+  padding: 0.65rem 1.35rem;
+  border-radius: var(--radius-pill);
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  user-select: none;
+  position: relative;
+  outline: none;
+}
+
+/* Primary Button (Emerald Green) */
+.quill-btn-primary {
+  background-color: var(--color-accent);
+  color: var(--color-accent-text);
+  border: 1px solid var(--color-accent);
+}
+
+.quill-btn-primary:hover:not(:disabled) {
+  background-color: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+  transform: translateY(var(--hover-lift));
+}
+
+.quill-btn-primary:active:not(:disabled) {
+  background-color: var(--color-accent-pressed);
+  transform: translateY(0);
+}
+
+/* Secondary Button (Elevated Charcoal Outline) */
+.quill-btn-secondary {
+  background-color: var(--color-ink-elevated);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+}
+
+.quill-btn-secondary:hover:not(:disabled) {
+  background-color: var(--color-ink-muted);
+  border-color: var(--color-border-strong);
+  transform: translateY(var(--hover-lift));
+}
+
+/* Ghost Button (Transparent minimal) */
+.quill-btn-ghost {
+  background-color: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid transparent;
+}
+
+.quill-btn-ghost:hover:not(:disabled) {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+/* Text Button (Inline link-like) */
+.quill-btn-text {
+  min-height: auto;
+  padding: 0.25rem 0.5rem;
+  background-color: transparent;
+  color: var(--color-text-secondary);
+  border: none;
+  border-radius: var(--radius-sm);
+}
+
+.quill-btn-text:hover:not(:disabled) {
+  color: var(--color-accent);
+}
+
+/* Button Loading State Spinner */
+.quill-btn-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: quillSpin 0.75s linear infinite;
+}
+
+@keyframes quillSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* --------------------------------------------------------------------------
+   2. ICON BUTTON
+   -------------------------------------------------------------------------- */
+.quill-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  background-color: transparent;
+  border: 1px solid transparent;
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.quill-icon-btn-standard {
+  width: 40px;
+  height: 40px;
+}
+
+.quill-icon-btn-compact {
+  width: 32px;
+  height: 32px;
+}
+
+.quill-icon-btn:hover:not(:disabled) {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
+  border-color: var(--color-border-subtle);
+}
+
+.quill-icon-btn.active {
+  color: var(--color-accent);
+  background-color: var(--color-accent-soft);
+  border-color: var(--color-accent-border);
+}
+
+/* --------------------------------------------------------------------------
+   3. FORM FIELDS & INPUTS
+   -------------------------------------------------------------------------- */
+.quill-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  width: 100%;
+}
+
+.quill-form-label {
+  font-size: var(--text-size-caption);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.quill-form-required {
+  color: var(--color-accent);
+}
+
+.quill-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.quill-input,
+.quill-textarea,
+.quill-select {
+  width: 100%;
+  font-family: var(--font-sans);
+  font-size: var(--text-size-body-sm);
+  background-color: var(--color-ink-elevated);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.65rem 0.95rem;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.quill-input:hover,
+.quill-textarea:hover,
+.quill-select:hover {
+  border-color: var(--color-border-strong);
+}
+
+.quill-input:focus,
+.quill-textarea:focus,
+.quill-select:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent);
+}
+
+.quill-input-error {
+  border-color: var(--color-error) !important;
+}
+
+.quill-input-error:focus {
+  box-shadow: 0 0 0 1px var(--color-error) !important;
+}
+
+.quill-input-helper {
+  font-size: var(--text-size-caption);
+  color: var(--color-text-muted);
+}
+
+.quill-input-error-msg {
+  font-size: var(--text-size-caption);
+  color: var(--color-error);
+}
+
+/* Search Input Specifics */
+.quill-search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.quill-search-icon {
+  position: absolute;
+  left: 0.85rem;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.quill-search-input {
+  padding-left: 2.35rem;
+  padding-right: 2.25rem;
+  border-radius: var(--radius-pill);
+}
+
+.quill-search-clear {
+  position: absolute;
+  right: 0.75rem;
+  color: var(--color-text-muted);
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: color var(--transition-fast);
+}
+
+.quill-search-clear:hover {
+  color: var(--color-text-primary);
+}
+
+/* Password Toggle Specifics */
+.quill-password-toggle {
+  position: absolute;
+  right: 0.75rem;
+  color: var(--color-text-muted);
+  padding: 4px;
+}
+
+.quill-password-toggle:hover {
+  color: var(--color-text-primary);
+}
+
+/* --------------------------------------------------------------------------
+   4. TOPIC CHIPS & FILTER PILLS
+   -------------------------------------------------------------------------- */
+.quill-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-sans);
+  font-size: var(--text-size-caption);
+  font-weight: var(--weight-medium);
+  padding: 0.45rem 1.05rem;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-ink-elevated);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.quill-chip:hover:not(:disabled) {
+  border-color: var(--color-border-strong);
+  color: var(--color-text-primary);
+}
+
+.quill-chip.selected {
+  background-color: var(--color-accent-soft);
+  color: var(--color-accent);
+  border-color: var(--color-accent-border);
+}
+
+.quill-chip-compact {
+  padding: 0.3rem 0.75rem;
+  font-size: 0.78rem;
+}
+
+.quill-chip-count {
+  font-size: 0.75rem;
+  opacity: 0.75;
+}
+
+/* --------------------------------------------------------------------------
+   5. AVATAR
+   -------------------------------------------------------------------------- */
+.quill-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: var(--color-ink-muted);
+  color: var(--color-text-primary);
+  font-weight: var(--weight-semibold);
+  border: 1px solid var(--color-border);
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.quill-avatar-xs { width: 22px; height: 22px; font-size: 0.65rem; }
+.quill-avatar-sm { width: 28px; height: 28px; font-size: 0.75rem; }
+.quill-avatar-md { width: 36px; height: 36px; font-size: 0.88rem; }
+.quill-avatar-lg { width: 48px; height: 48px; font-size: 1.1rem; }
+
+.quill-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* --------------------------------------------------------------------------
+   6. STORY METADATA & STORY PREVIEW CARDS
+   -------------------------------------------------------------------------- */
+.quill-story-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-size-caption);
+  color: var(--color-text-muted);
+  flex-wrap: wrap;
+}
+
+.quill-story-meta-author {
+  font-weight: var(--weight-medium);
+  color: var(--color-text-primary);
+}
+
+.quill-story-meta-dot {
+  color: var(--color-text-muted);
+}
+
+.quill-story-meta-topic {
+  background-color: var(--color-surface-hover);
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+}
+
+/* Feed Story Item (Horizontal Feed Card) */
+.quill-feed-story {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-6);
+  padding: var(--space-6) 0;
+  border-bottom: 1px solid var(--color-border);
+  transition: transform var(--transition-fast);
+}
+
+.quill-feed-story-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.quill-feed-story-title {
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+  color: var(--color-text-primary);
+  margin: var(--space-2) 0;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.quill-feed-story-title:hover {
+  color: var(--color-accent);
+}
+
+.quill-feed-story-excerpt {
+  font-size: var(--text-size-body-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-normal);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: var(--space-3);
+}
+
+.quill-feed-story-artwork {
+  width: 140px;
+  height: 94px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  flex-shrink: 0;
+  background-color: var(--color-ink-muted);
+  border: 1px solid var(--color-border);
+}
+
+.quill-feed-story-artwork svg {
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 640px) {
+  .quill-feed-story {
+    flex-direction: column-reverse;
+    gap: var(--space-4);
+  }
+  .quill-feed-story-artwork {
+    width: 100%;
+    height: 140px;
+  }
+}
+
+/* Featured Story Card */
+.quill-featured-story {
+  background-color: var(--color-ink-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  transition: border-color var(--transition-base);
+}
+
+.quill-featured-story:hover {
+  border-color: var(--color-border-strong);
+}
+
+.quill-featured-story-cover {
+  width: 100%;
+  height: 200px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background-color: var(--color-ink-muted);
+}
+
+/* Compact Story Link (For Community Picks) */
+.quill-compact-story {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.quill-compact-story-title {
+  font-family: var(--font-serif);
+  font-size: 0.98rem;
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-snug);
+  color: var(--color-text-primary);
+  transition: color var(--transition-fast);
+}
+
+.quill-compact-story-title:hover {
+  color: var(--color-accent);
+}
+
+/* --------------------------------------------------------------------------
+   7. NAVIGATION COMPONENTS
+   -------------------------------------------------------------------------- */
+.quill-sidebar-nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 0.65rem 0.95rem;
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: var(--text-size-nav);
+  font-weight: var(--weight-medium);
+  transition: all var(--transition-fast);
+  position: relative;
+  width: 100%;
+}
+
+.quill-sidebar-nav-item:hover {
+  color: var(--color-text-primary);
+  background-color: var(--color-surface-hover);
+}
+
+.quill-sidebar-nav-item.active {
+  color: var(--color-accent);
+  background-color: var(--color-accent-soft);
+  font-weight: var(--weight-semibold);
+}
+
+.quill-section-label {
+  font-size: var(--text-size-eyebrow);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  font-weight: var(--weight-semibold);
+  margin-bottom: var(--space-2);
+  display: block;
+}
+
+/* Tab System */
+.quill-tab-list {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: var(--space-6);
+}
+
+.quill-tab-btn {
+  padding: 0.75rem 0;
+  font-size: var(--text-size-body-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-muted);
+  position: relative;
+  transition: color var(--transition-fast);
+}
+
+.quill-tab-btn:hover {
+  color: var(--color-text-primary);
+}
+
+.quill-tab-btn.active {
+  color: var(--color-text-primary);
+  font-weight: var(--weight-semibold);
+}
+
+.quill-tab-btn.active::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--color-accent);
+  border-radius: var(--radius-pill);
+}
+
+/* --------------------------------------------------------------------------
+   8. FEEDBACK & OVERLAYS
+   -------------------------------------------------------------------------- */
+/* Empty State */
+.quill-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--space-12) var(--space-4);
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.quill-empty-art {
+  width: 120px;
+  height: 120px;
+  margin-bottom: var(--space-6);
+  color: var(--color-accent);
+}
+
+.quill-empty-title {
+  font-family: var(--font-serif);
+  font-size: var(--text-size-h3);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.quill-empty-desc {
+  font-size: var(--text-size-body-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-6);
+  line-height: var(--leading-normal);
+}
+
+/* Inline Message Banner */
+.quill-inline-msg {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--text-size-body-sm);
+  margin-bottom: var(--space-4);
+  border: 1px solid transparent;
+}
+
+.quill-inline-msg-success {
+  background-color: var(--color-success-soft);
+  color: var(--color-success);
+  border-color: rgba(53, 184, 75, 0.25);
+}
+
+.quill-inline-msg-warning {
+  background-color: var(--color-warning-soft);
+  color: var(--color-warning);
+  border-color: rgba(217, 155, 38, 0.25);
+}
+
+.quill-inline-msg-error {
+  background-color: var(--color-error-soft);
+  color: var(--color-error);
+  border-color: rgba(217, 83, 79, 0.25);
+}
+
+.quill-inline-msg-info {
+  background-color: var(--color-info-soft);
+  color: var(--color-info);
+  border-color: rgba(90, 115, 142, 0.25);
+}
+
+/* Toast Container & Notification */
+.quill-toast-container {
+  position: fixed;
+  bottom: var(--space-6);
+  right: var(--space-6);
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  pointer-events: none;
+}
+
+.quill-toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background-color: var(--color-ink-muted);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-strong);
+  box-shadow: var(--shadow-md);
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius-md);
+  font-size: var(--text-size-body-sm);
+  animation: quillToastSlide 0.22s var(--ease-standard) forwards;
+}
+
+@keyframes quillToastSlide {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Loading Skeletons */
+.quill-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-ink-elevated) 25%,
+    var(--color-ink-muted) 37%,
+    var(--color-ink-elevated) 63%
+  );
+  background-size: 400% 100%;
+  animation: quillSkeletonShimmer 1.5s ease infinite;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes quillSkeletonShimmer {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quill-skeleton {
+    animation: none !important;
+    background: var(--color-ink-elevated) !important;
+  }
+}
+
+/* Modal Overlay */
+.quill-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: var(--color-overlay);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  animation: quillFadeIn 0.18s ease-out forwards;
+}
+
+.quill-modal-card {
+  background-color: var(--color-ink-elevated);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 560px;
+  position: relative;
+  padding: var(--space-6);
+  animation: quillSlideUp 0.22s var(--ease-standard) forwards;
+}
+
+@keyframes quillFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes quillSlideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
