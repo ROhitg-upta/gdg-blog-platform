@@ -9,7 +9,16 @@ import { useReader } from '../hooks/useReader';
 import { Toast, ToastContainer } from '../components/ui/Toast';
 
 export default function CommunityPage({ onNavigate, initialRoute = '/community' }) {
-  const { bookmarks, followedWriterIds, isBookmarked, toggleBookmark, toasts, dismissToast, reader } = useReader();
+  const {
+    bookmarks,
+    followedWriterIds,
+    isBookmarked,
+    toggleBookmark,
+    toasts,
+    dismissToast,
+    reader,
+    allPublishedStories
+  } = useReader();
 
   // Parse initial topic from URL query param if present
   const [selectedTopic, setSelectedTopic] = useState(() => {
@@ -29,8 +38,8 @@ export default function CommunityPage({ onNavigate, initialRoute = '/community' 
   const [selectedStory, setSelectedStory] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // All hydrated stories from community dataset
-  const allStories = useMemo(() => getAllHydratedStories(), []);
+  // All published stories combining reader-authored published stories and curated sample stories
+  const allStories = allPublishedStories || [];
 
   // Compute greeting based on local time of day
   const greeting = useMemo(() => {
@@ -73,11 +82,10 @@ export default function CommunityPage({ onNavigate, initialRoute = '/community' 
 
       // 3. Search filter
       if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase().trim();
-        const matchTitle = story.title.toLowerCase().includes(query);
-        const matchExcerpt = story.excerpt.toLowerCase().includes(query);
-        const matchAuthor = story.author.name.toLowerCase().includes(query);
-        const matchTopic = story.topic.toLowerCase().includes(query);
+        const matchTitle = (story.title || '').toLowerCase().includes(query);
+        const matchExcerpt = (story.excerpt || story.subtitle || '').toLowerCase().includes(query);
+        const matchAuthor = (story.author?.name || 'Reader').toLowerCase().includes(query);
+        const matchTopic = (story.topic || '').toLowerCase().includes(query);
         if (!matchTitle && !matchExcerpt && !matchAuthor && !matchTopic) {
           return false;
         }
@@ -271,9 +279,9 @@ export default function CommunityPage({ onNavigate, initialRoute = '/community' 
             <article className="quill-featured-story">
               <div
                 className="quill-featured-story-cover"
-                onClick={() => setSelectedStory(featuredStory)}
+                onClick={() => onNavigate(`/story/${featuredStory.slug}`)}
                 style={{ cursor: 'pointer' }}
-                aria-label={`Featured story: ${featuredStory.title}`}
+                aria-label={`Read featured story: ${featuredStory.title}`}
               >
                 <StoryArtworkRenderer artworkId={featuredStory.artworkId} />
               </div>
@@ -296,7 +304,7 @@ export default function CommunityPage({ onNavigate, initialRoute = '/community' 
                     color: 'var(--color-text-primary)',
                     lineHeight: 'var(--leading-snug)'
                   }}
-                  onClick={() => setSelectedStory(featuredStory)}
+                  onClick={() => onNavigate(`/story/${featuredStory.slug}`)}
                 >
                   {featuredStory.title}
                 </h3>
@@ -316,10 +324,20 @@ export default function CommunityPage({ onNavigate, initialRoute = '/community' 
                 </p>
 
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div style={{ fontSize: '0.84rem', color: 'var(--color-text-secondary)' }}>
-                    <span>By {featuredStory.author.name}</span>
-                    <span style={{ margin: '0 6px' }}>·</span>
-                    <span>{featuredStory.date}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+                    <div style={{ fontSize: '0.84rem', color: 'var(--color-text-secondary)' }}>
+                      <span>By {featuredStory.author.name}</span>
+                      <span style={{ margin: '0 6px' }}>·</span>
+                      <span>{featuredStory.date}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => onNavigate(`/story/${featuredStory.slug}`)}
+                      className="quill-btn-text"
+                      style={{ fontSize: '0.82rem', color: 'var(--color-accent)', padding: 0 }}
+                    >
+                      Read story →
+                    </button>
                   </div>
 
                   <button
@@ -362,12 +380,12 @@ export default function CommunityPage({ onNavigate, initialRoute = '/community' 
                       {/* Title */}
                       <h3
                         className="quill-feed-story-title"
-                        onClick={() => setSelectedStory(story)}
+                        onClick={() => onNavigate(`/story/${story.slug}`)}
                         tabIndex={0}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' || e.key === ' ') {
                             e.preventDefault();
-                            setSelectedStory(story);
+                            onNavigate(`/story/${story.slug}`);
                           }
                         }}
                       >
@@ -387,11 +405,19 @@ export default function CommunityPage({ onNavigate, initialRoute = '/community' 
                           </span>
                           <button
                             type="button"
-                            onClick={() => setSelectedStory(story)}
+                            onClick={() => onNavigate(`/story/${story.slug}`)}
                             className="quill-btn-text"
                             style={{ fontSize: '0.8rem', color: 'var(--color-accent)', padding: 0 }}
                           >
-                            Read preview →
+                            Read story →
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedStory(story)}
+                            className="quill-btn-text"
+                            style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', padding: '0 4px' }}
+                          >
+                            Preview
                           </button>
                         </div>
 
@@ -421,11 +447,11 @@ export default function CommunityPage({ onNavigate, initialRoute = '/community' 
                     {/* Artwork Cover Thumbnail */}
                     <div
                       className="quill-feed-story-artwork"
-                      onClick={() => setSelectedStory(story)}
+                      onClick={() => onNavigate(`/story/${story.slug}`)}
                       style={{ cursor: 'pointer' }}
                       role="button"
                       tabIndex={0}
-                      aria-label={`Preview story artwork: ${story.title}`}
+                      aria-label={`Read story: ${story.title}`}
                     >
                       <StoryArtworkRenderer artworkId={story.artworkId} />
                     </div>
@@ -556,6 +582,7 @@ export default function CommunityPage({ onNavigate, initialRoute = '/community' 
         story={selectedStory}
         isOpen={Boolean(selectedStory)}
         onClose={() => setSelectedStory(null)}
+        onNavigate={onNavigate}
       />
 
       {/* Toast Feedback Notifications */}

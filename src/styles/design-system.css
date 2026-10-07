@@ -240,6 +240,9 @@ img, svg {
   .quill-dashboard-rail {
     display: none;
   }
+  .quill-dashboard-main {
+    grid-column: auto !important;
+  }
 }
 
 @media (max-width: 768px) {
@@ -250,6 +253,27 @@ img, svg {
   }
   .quill-dashboard-sidebar {
     display: none;
+  }
+  .quill-dashboard-main {
+    grid-column: 1 / -1 !important;
+  }
+}
+
+/* Writer Studio Responsive Layout */
+.quill-studio-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: var(--space-8);
+  align-items: start;
+}
+
+@media (max-width: 960px) {
+  .quill-studio-grid {
+    grid-template-columns: 1fr !important;
+    gap: var(--space-6);
+  }
+  .quill-studio-aside {
+    position: static !important;
   }
 }
 

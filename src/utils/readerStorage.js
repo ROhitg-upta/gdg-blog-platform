@@ -5,7 +5,7 @@
  * 
  * DISCLAIMER:
  * This is a frontend prototype context for saving personal reading shelf
- * preferences (bookmarks, followed writers, and topic interests) within
+ * preferences (bookmarks, followed writers, and typography preferences) within
  * the local browser. It is NOT authentication and NOT multi-user security.
  * ============================================================================
  */
@@ -13,7 +13,8 @@
 export const STORAGE_KEYS = {
   READER: 'quill.reader.v1',
   BOOKMARKS: 'quill.bookmarks.v1',
-  FOLLOWS: 'quill.follows.v1'
+  FOLLOWS: 'quill.follows.v1',
+  PREFERENCES: 'quill.reader-preferences.v1'
 };
 
 // Legacy auth keys to safely purge once (without touching any unrelated data)
@@ -76,4 +77,26 @@ export function createDefaultReader() {
     followedWriterIds: [],
     enteredAt: new Date().toISOString()
   };
+}
+
+export function createDefaultPreferences() {
+  return {
+    textSize: 'default',       // 'small' | 'default' | 'large'
+    readingWidth: 'standard',   // 'standard' | 'spacious'
+    lineSpacing: 'standard'    // 'standard' | 'relaxed'
+  };
+}
+
+export function getStoredPreferences() {
+  const saved = safeGetItem(STORAGE_KEYS.PREFERENCES);
+  if (!saved || typeof saved !== 'object') return createDefaultPreferences();
+  return {
+    textSize: ['small', 'default', 'large'].includes(saved.textSize) ? saved.textSize : 'default',
+    readingWidth: ['standard', 'spacious'].includes(saved.readingWidth) ? saved.readingWidth : 'standard',
+    lineSpacing: ['standard', 'relaxed'].includes(saved.lineSpacing) ? saved.lineSpacing : 'standard'
+  };
+}
+
+export function saveStoredPreferences(prefs) {
+  return safeSetItem(STORAGE_KEYS.PREFERENCES, prefs);
 }

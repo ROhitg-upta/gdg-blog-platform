@@ -8,12 +8,12 @@ import { useReader } from '../hooks/useReader';
 import { Toast, ToastContainer } from '../components/ui/Toast';
 
 export default function BookmarksPage({ onNavigate }) {
-  const { bookmarks, toggleBookmark, toasts, dismissToast } = useReader();
+  const { bookmarks, toggleBookmark, toasts, dismissToast, allPublishedStories } = useReader();
   const [selectedStory, setSelectedStory] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const allStories = useMemo(() => getAllHydratedStories(), []);
+  const allStories = allPublishedStories || [];
 
   // Filter bookmarked stories
   const bookmarkedStories = useMemo(() => {
@@ -25,10 +25,10 @@ export default function BookmarksPage({ onNavigate }) {
     if (!searchQuery.trim()) return bookmarkedStories;
     const q = searchQuery.toLowerCase().trim();
     return bookmarkedStories.filter((s) =>
-      s.title.toLowerCase().includes(q) ||
-      s.excerpt.toLowerCase().includes(q) ||
-      s.author.name.toLowerCase().includes(q) ||
-      s.topic.toLowerCase().includes(q)
+      (s.title || '').toLowerCase().includes(q) ||
+      (s.excerpt || s.subtitle || '').toLowerCase().includes(q) ||
+      (s.author?.name || 'Reader').toLowerCase().includes(q) ||
+      (s.topic || '').toLowerCase().includes(q)
     );
   }, [bookmarkedStories, searchQuery]);
 
@@ -93,12 +93,12 @@ export default function BookmarksPage({ onNavigate }) {
 
                     <h3
                       className="quill-feed-story-title"
-                      onClick={() => setSelectedStory(story)}
+                      onClick={() => onNavigate(`/story/${story.slug}`)}
                       tabIndex={0}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' || e.key === ' ') {
                           e.preventDefault();
-                          setSelectedStory(story);
+                          onNavigate(`/story/${story.slug}`);
                         }
                       }}
                     >
@@ -116,11 +116,19 @@ export default function BookmarksPage({ onNavigate }) {
                         </span>
                         <button
                           type="button"
-                          onClick={() => setSelectedStory(story)}
+                          onClick={() => onNavigate(`/story/${story.slug}`)}
                           className="quill-btn-text"
                           style={{ fontSize: '0.8rem', color: 'var(--color-accent)', padding: 0 }}
                         >
-                          Read preview →
+                          Read story →
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedStory(story)}
+                          className="quill-btn-text"
+                          style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', padding: '0 4px' }}
+                        >
+                          Preview
                         </button>
                       </div>
 
@@ -143,8 +151,11 @@ export default function BookmarksPage({ onNavigate }) {
 
                   <div
                     className="quill-feed-story-artwork"
-                    onClick={() => setSelectedStory(story)}
+                    onClick={() => onNavigate(`/story/${story.slug}`)}
                     style={{ cursor: 'pointer' }}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Read story: ${story.title}`}
                   >
                     <StoryArtworkRenderer artworkId={story.artworkId} />
                   </div>
@@ -229,6 +240,7 @@ export default function BookmarksPage({ onNavigate }) {
         story={selectedStory}
         isOpen={Boolean(selectedStory)}
         onClose={() => setSelectedStory(null)}
+        onNavigate={onNavigate}
       />
 
       {/* Toasts */}

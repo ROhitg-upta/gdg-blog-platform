@@ -7,7 +7,8 @@ import Avatar from '../ui/Avatar';
 export default function StoryPreviewModal({
   story,
   isOpen = false,
-  onClose
+  onClose,
+  onNavigate
 }) {
   const { isBookmarked, toggleBookmark } = useReader();
 
@@ -19,6 +20,13 @@ export default function StoryPreviewModal({
 
   const handleBookmarkClick = () => {
     toggleBookmark(story.id, story.title);
+  };
+
+  const handleReadFullStory = () => {
+    onClose();
+    if (onNavigate && story.slug) {
+      onNavigate(`/story/${story.slug}`);
+    }
   };
 
   return (
@@ -148,27 +156,41 @@ export default function StoryPreviewModal({
         )}
       </div>
 
-      {/* Footer notice and close */}
+      {/* Footer notice and actions */}
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           paddingTop: 'var(--space-4)',
-          borderTop: '1px solid var(--color-border-subtle)'
+          borderTop: '1px solid var(--color-border-subtle)',
+          flexWrap: 'wrap',
+          gap: 'var(--space-2)'
         }}
       >
         <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
-          Full reading experience arrives in Module 4.
+          Quick preview of curated essay
         </span>
-        <button
-          type="button"
-          onClick={onClose}
-          className="quill-btn quill-btn-secondary"
-          style={{ padding: '0.45rem 1.1rem', minHeight: '36px', fontSize: '0.85rem' }}
-        >
-          Done reading
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+          <button
+            type="button"
+            onClick={onClose}
+            className="quill-btn quill-btn-secondary"
+            style={{ padding: '0.42rem 0.95rem', minHeight: '34px', fontSize: '0.84rem' }}
+          >
+            Close
+          </button>
+          {story.slug && onNavigate && (
+            <button
+              type="button"
+              onClick={handleReadFullStory}
+              className="quill-btn quill-btn-primary"
+              style={{ padding: '0.42rem 1.1rem', minHeight: '34px', fontSize: '0.84rem' }}
+            >
+              Read full story →
+            </button>
+          )}
+        </div>
       </div>
     </Modal>
   );

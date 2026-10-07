@@ -1,6 +1,7 @@
 export const MOSAIC_STORIES = [
   {
     id: "story-1",
+    slug: "make-room-for-your-next-idea",
     topic: "CREATIVITY",
     title: "Make room for your next idea.",
     author: {
@@ -23,6 +24,7 @@ export const MOSAIC_STORIES = [
   },
   {
     id: "story-2",
+    slug: "small-beginnings-remarkable-possibilities",
     topic: "IDEAS",
     title: "Small beginnings. Remarkable possibilities.",
     author: {
@@ -46,6 +48,7 @@ export const MOSAIC_STORIES = [
   },
   {
     id: "story-3",
+    slug: "beauty-of-paying-attention",
     topic: "LIFE",
     title: "The beauty of paying attention.",
     author: {

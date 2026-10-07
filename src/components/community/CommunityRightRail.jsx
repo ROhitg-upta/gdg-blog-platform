@@ -13,7 +13,9 @@ export default function CommunityRightRail({
 
   const handlePickClick = (pickId) => {
     const fullStory = hydratedStories.find((s) => s.id === pickId);
-    if (fullStory && onSelectStory) {
+    if (fullStory && onNavigate && fullStory.slug) {
+      onNavigate(`/story/${fullStory.slug}`);
+    } else if (fullStory && onSelectStory) {
       onSelectStory(fullStory);
     }
   };

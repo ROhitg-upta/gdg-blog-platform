@@ -76,6 +76,7 @@ export default function LandingPage({ onNavigate }) {
         story={selectedStory}
         isOpen={Boolean(selectedStory)}
         onClose={() => setSelectedStory(null)}
+        onNavigate={onNavigate}
       />
     </div>
   );
