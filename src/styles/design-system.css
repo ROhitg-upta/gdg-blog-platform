@@ -22,8 +22,8 @@ html {
 }
 
 body {
-  background-color: var(--color-ink);
-  color: var(--color-text-primary);
+  background-color: var(--color-paper, #F8F5EE);
+  color: var(--color-text-inverse, #1E1C1A);
   font-family: var(--font-sans);
   line-height: var(--leading-normal);
   -webkit-font-smoothing: antialiased;

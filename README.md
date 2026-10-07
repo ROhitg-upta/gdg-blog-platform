@@ -143,6 +143,25 @@ npm run preview
 
 ---
 
+## 🔐 Prototype Authentication & Demo Credentials
+
+> [!NOTE]
+> **Prototype Simulation Disclaimer:**  
+> This project currently uses browser-local prototype authentication (`quill.prototype.session` and `quill.prototype.users`).
+> * Sessions and user profiles are stored in the current browser's `localStorage`.
+> * It is **not production authentication** and does not provide multi-user cloud synchronization or cryptographic password storage.
+> * A real production release requires a backend authentication provider (e.g., Supabase Auth, Firebase Auth, OAuth2) and server-side authorization guards.
+
+### Pre-configured Development Demo Credentials
+For testing and reviewing the authenticated flow without manual signup:
+* **Demo Name:** Vishal Gupta
+* **Demo Email:** `demo@quill.local`
+* **Demo Password:** `QuillDemo2026!`
+
+Alternatively, click the **"Use prototype demo account"** action on the `/login` screen to populate credentials immediately.
+
+---
+
 ## 💾 Data Source & Persistence Strategy
 
 * **Zero External Dependencies Required:** The application is architected to be 100% functional out-of-the-box without requiring an external backend server or database setup.

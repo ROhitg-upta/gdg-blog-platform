@@ -709,3 +709,155 @@
   from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* --------------------------------------------------------------------------
+   9. AUTHENTICATION & ONBOARDING STYLES (MODULE 2)
+   -------------------------------------------------------------------------- */
+
+.quill-auth-split-layout {
+  display: grid;
+  grid-template-columns: 46% 54%;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.quill-auth-editorial-panel {
+  background-color: var(--color-ink);
+  color: var(--color-text-primary);
+  padding: var(--space-10) var(--space-8);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  border-right: 1px solid var(--color-border);
+}
+
+.quill-auth-form-panel {
+  background-color: var(--color-paper, #F8F5EE);
+  color: var(--color-text-inverse, #1E1C1A);
+  padding: var(--space-10) var(--space-12);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.quill-auth-form-card {
+  width: 100%;
+  max-width: 440px;
+}
+
+.quill-auth-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: var(--space-5) 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-size-caption);
+}
+
+.quill-auth-divider::before,
+.quill-auth-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid rgba(30, 28, 26, 0.15);
+}
+
+.quill-auth-divider::before {
+  margin-right: var(--space-3);
+}
+
+.quill-auth-divider::after {
+  margin-left: var(--space-3);
+}
+
+.quill-auth-quote-box {
+  background-color: var(--color-ink-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  margin-top: var(--space-6);
+}
+
+.quill-auth-demo-action {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 0.65rem;
+  border-radius: var(--radius-md);
+  border: 1px dashed rgba(30, 28, 26, 0.25);
+  background-color: rgba(30, 28, 26, 0.03);
+  font-size: var(--text-size-caption);
+  color: var(--color-text-secondary);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.quill-auth-demo-action:hover {
+  background-color: rgba(53, 184, 75, 0.08);
+  border-color: var(--color-accent);
+  color: var(--color-accent-text);
+}
+
+.quill-auth-prototype-note {
+  font-size: 0.76rem;
+  color: var(--color-text-muted);
+  text-align: center;
+  margin-top: var(--space-5);
+  line-height: 1.45;
+}
+
+/* Onboarding Screen Specifics */
+.quill-onboarding-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-paper, #F8F5EE);
+  color: var(--color-text-inverse, #1E1C1A);
+  padding: var(--space-8) var(--space-4);
+}
+
+.quill-onboarding-card {
+  max-width: 680px;
+  margin: auto;
+  width: 100%;
+  background-color: #FFFFFF;
+  border: 1px solid rgba(30, 28, 26, 0.1);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8);
+  box-shadow: 0 10px 30px -4px rgba(30, 28, 26, 0.06);
+}
+
+.quill-onboarding-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin: var(--space-6) 0;
+}
+
+/* Protected Placeholder Specifics */
+.quill-placeholder-card {
+  max-width: 720px;
+  margin: 3rem auto;
+  padding: var(--space-8);
+  background-color: #FFFFFF;
+  border: 1px solid rgba(30, 28, 26, 0.1);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 12px 36px -4px rgba(30, 28, 26, 0.07);
+}
+
+@media (max-width: 900px) {
+  .quill-auth-split-layout {
+    grid-template-columns: 1fr;
+  }
+  .quill-auth-editorial-panel {
+    display: none;
+  }
+  .quill-auth-form-panel {
+    padding: var(--space-8) var(--space-4);
+  }
+}

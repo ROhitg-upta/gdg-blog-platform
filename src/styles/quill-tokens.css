@@ -16,10 +16,10 @@
   --color-ink-muted: #292620;
   --color-ink-subtle: #332F27;
   
-  /* Core Paper (Warm Surfaces) */
-  --color-paper: #F4EFE5;
-  --color-paper-strong: #FFFDF8;
-  --color-paper-muted: #E8E2D5;
+  /* Core Paper (Warm Surfaces matching reference image) */
+  --color-paper: #F8F5EE;
+  --color-paper-strong: #FFFEFC;
+  --color-paper-muted: #EBE5D8;
   
   /* Text Roles */
   --color-text-primary: #F5F0E6;
