@@ -107,74 +107,48 @@
 
 | Route | Access Type | Purpose | Core Components | Redirect Rules |
 | :--- | :--- | :--- | :--- | :--- |
-| `/` | System Entry | Root distributor | `AppShell` | If authenticated $\rightarrow$ `/community`<br>If unauthenticated $\rightarrow$ `/login` |
-| `/login` | Public | Credential entry & demo login | `AuthLayout`, `LoginForm` | If authenticated $\rightarrow$ `/community` |
-| `/signup` | Public | Account creation | `AuthLayout`, `SignupForm` | If authenticated $\rightarrow$ `/community` |
-| `/onboarding` | Semi-Protected | Reading interest selector | `InterestPicker` | If unauthenticated $\rightarrow$ `/login` |
-| `/community` | Protected | Central editorial home feed | `TopNav`, `Sidebar`, `StoryFeed`, `RightSidebar` | If unauthenticated $\rightarrow$ `/login` |
-| `/explore` | Protected | Curated topics & trending directory | `TopNav`, `TopicDirectory`, `FeaturedGrid` | If unauthenticated $\rightarrow$ `/login` |
-| `/story/:slug` | Protected | Full-article immersive reader | `TopNav`, `StoryReader`, `CommentThread`, `StoryMeta` | If unauthenticated $\rightarrow$ `/login`<br>If slug invalid $\rightarrow$ `/404` |
-| `/write` | Protected | Writer Studio — new drafting canvas | `WriterStudioNav`, `EditorCanvas`, `PublishModal` | If unauthenticated $\rightarrow$ `/login` |
-| `/write/:id/edit`| Protected | Writer Studio — edit existing story | `WriterStudioNav`, `EditorCanvas`, `PublishModal` | If unauthenticated $\rightarrow$ `/login`<br>If id invalid $\rightarrow$ `/my-stories` |
-| `/write/:id/preview`| Protected| Reader preview of current draft | `StoryReader`, `PreviewBanner` | If unauthenticated $\rightarrow$ `/login` |
-| `/my-stories` | Protected | User stories & draft management | `TopNav`, `StoryManagerTabs`, `StoryActionModal` | If unauthenticated $\rightarrow$ `/login` |
-| `/bookmarks` | Protected | User's saved stories shelf | `TopNav`, `BookmarkList`, `EmptyState` | If unauthenticated $\rightarrow$ `/login` |
-| `/profile/:username`| Protected| Author profile & published archive| `ProfileHeader`, `AuthorFeed` | If unauthenticated $\rightarrow$ `/login` |
-| `/settings` | Protected | Profile bio & display preferences | `SettingsForm`, `ThemeSwitch` | If unauthenticated $\rightarrow$ `/login` |
-| `/404` | Public/Catch-all | Missing route fallback | `NotFoundView`, `ReturnButton` | None |
+| `/` | Public | Warm Ivory Editorial Landing Page | `Header`, `Hero`, `StoryMosaic`, `ExploreTopics`, `EditorialInfo`, `Footer` | Always renders landing page |
+| `/community` | Open / Reader | 3-Column Light Editorial Community Dashboard | `CommunityHeader`, `CommunityLeftNav`, `FeedStream`, `CommunityRightRail` | Auto-initializes reader context if direct visit |
+| `/explore` | Open / Reader | Curated topics & search-driven directory | `CommunityHeader`, `CommunityLeftNav`, `FeedStream`, `CommunityRightRail` | Direct access |
+| `/bookmarks` | Open / Reader | User's saved stories reading shelf | `CommunityHeader`, `CommunityLeftNav`, `BookmarksStream` | Direct access (persists in `quill.bookmarks.v1`) |
+| `/write` | Open / Reader | Writer Studio — honest coming-next destination | `CommunityHeader`, `CommunityLeftNav`, `WriterStudioComingSoon` | Direct access |
+| `/my-stories` | Open / Reader | Story management — honest coming-next destination | `CommunityHeader`, `CommunityLeftNav`, `WriterStudioComingSoon` | Direct access |
+| `/design-system` | Internal | Design system tokens and component preview | `DesignSystemPreview` | Direct internal preview |
+| `/login`, `/signup`, `/onboarding` | Legacy | Deprecated prototype auth routes | None | Redirects with replace navigation to `/` |
+| `/404` | Public/Catch-all | Missing route fallback | `NotFoundPage`, `ReturnButton` | None |
 
 ---
 
-## 5. Authentication Plan
+## 5. Lightweight Reader Context (Module 3 Corrected Architecture)
 
-The authentication layer is architected as an extensible frontend provider (`AuthContext`) implementing predictable session lifecycle contracts. In this prototype stage, credentials and profile records are validated against an initialized mock identity store, with state persisted in `localStorage`.
+In accordance with Module 3 requirements, all credential-based authentication (passwords, email validation, mandatory signups, and interest gates) has been removed from the product flow. 
+
+Quill operates as a frictionless light editorial prototype where visitors can enter the community with **one click** ("Continue as reader").
 
 ### Data Contracts
 
-#### Authenticated Session Object
+#### Local Reader Context Object
 ```typescript
-interface QuillSession {
-  token: string;          // e.g. "q_sess_9a8f2c1d"
-  userId: string;         // e.g. "usr_alex_vance"
-  expiresAt: number;      // Unix epoch timestamp (current + 7 days)
-  createdAt: string;      // ISO-8601 string
+interface QuillReader {
+  id: string;                 // "local-reader"
+  displayName: string;        // "Reader"
+  interests: string[];        // Array of selected topic strings
+  followedWriterIds: string[];// Array of followed writer IDs
+  enteredAt: string;          // ISO-8601 timestamp
 }
 ```
 
-#### User Identity Object
-```typescript
-interface QuillUser {
-  id: string;
-  name: string;
-  username: string;
-  email: string;
-  avatar: string;
-  bio: string;
-  interests: string[];
-  joinedDate: string;
-}
-```
+#### Local Storage Namespaces
+* `quill.reader.v1`: Reader profile state
+* `quill.bookmarks.v1`: Array of bookmarked story IDs
+* `quill.follows.v1`: Array of followed writer IDs
 
-### Pre-configured Demo Accounts
-To ensure evaluation without mandatory manual signups, the prototype seeds default demo credentials:
-* **Demo Account:** `alex@quill.editorial`
-* **Demo Password:** `quill123`
-* **Demo Name:** Alex Vance (`@alexvance`)
-* **Role:** Senior Design Writer & Community Member
-
-### Authentication Mechanics
-1. **Validation Pipeline:**
-   * Email must match standard regex pattern (`^[^\s@]+@[^\s@]+\.[^\s@]+$`).
-   * Password length $\ge$ 6 characters.
-   * On submission, the handler checks the local identity repository. If valid, an encrypted-style mock token is minted and written to `quill_session`.
-2. **Session Persistence & Hydration:**
-   * At application mount, `AuthProvider` reads `localStorage.getItem('quill_session')`.
-   * If a valid token and matching user exist, `isAuthenticated` initializes to `true`.
-   * If the token is corrupted or missing, the session resets to `null`, ensuring immediate routing to `/login`.
-3. **Session Teardown:**
-   * Calling `logout()` invokes atomic cleanup: clears `quill_session`, resets active user memory, and dispatches a redirect to `/login`.
-4. **Production Architecture Transition:**
-   * This frontend contract matches standard OAuth2/JWT flows. Transitioning to Firebase, Supabase, or custom REST APIs will require swapping the internal handler in `AuthContext` without modifying downstream components (`ProtectedRoute`, `TopNav`, or `AppShell`).
+### Entry & Navigation Mechanics
+1. **Root Landing (`/`):** Always renders the approved warm ivory landing page. Visiting `/` never redirects away to the dashboard, preserving the publication showcase.
+2. **One-Click Reader Entry:** Clicking "Continue as reader" initializes or refreshes the local reader session and navigates to `/community`.
+3. **Direct Dashboard Visits:** Directly navigating to `/community` or `/explore` automatically initializes a neutral reader context and displays the dashboard without an auth barrier.
+4. **Legacy Auth Routes:** Requests to `/login`, `/signup`, or `/onboarding` perform an immediate `replaceState` redirect to `/`. Obsolete credential storage keys (`quill.prototype.users`, `quill.prototype.session`) are purged safely on initial mount without invoking `localStorage.clear()`.
+5. **No Theme Toggle / No Dark Mode:** All active product screens strictly use the Light Editorial design system (`#F8F5EE` paper, `#FFFDFA` card, `#D85A35` terracotta orange accent).
 
 ---
 

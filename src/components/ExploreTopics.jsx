@@ -1,10 +1,17 @@
 import React, { useState } from 'react';
 import { EXPLORE_TOPICS } from '../data/editorialData';
 
-export default function ExploreTopics({ onSelectStory }) {
+export default function ExploreTopics({ onSelectStory, onNavigateTopic }) {
   const [selectedTopicId, setSelectedTopicId] = useState(EXPLORE_TOPICS[0].id);
 
   const currentTopic = EXPLORE_TOPICS.find((t) => t.id === selectedTopicId) || EXPLORE_TOPICS[0];
+
+  const handleTopicClick = (topic) => {
+    setSelectedTopicId(topic.id);
+    if (onNavigateTopic) {
+      onNavigateTopic(topic.name);
+    }
+  };
 
   return (
     <section id="explore" className="explore-section" aria-label="Explore Topics">
@@ -23,7 +30,7 @@ export default function ExploreTopics({ onSelectStory }) {
                 aria-selected={isActive}
                 aria-controls={`panel-${topic.id}`}
                 className={`topic-chip ${isActive ? 'active' : ''}`}
-                onClick={() => setSelectedTopicId(topic.id)}
+                onClick={() => handleTopicClick(topic)}
               >
                 {topic.name}
               </button>
@@ -41,7 +48,16 @@ export default function ExploreTopics({ onSelectStory }) {
       >
         <div className="topic-preview-header">
           <span className="topic-preview-tagline">{currentTopic.tagline}</span>
-          <span className="card-read-time">{currentTopic.stories.length} curated essays</span>
+          {onNavigateTopic && (
+            <button
+              type="button"
+              className="editorial-inline-action"
+              style={{ fontSize: '0.85rem' }}
+              onClick={() => onNavigateTopic(currentTopic.name)}
+            >
+              Browse all {currentTopic.name} in Community →
+            </button>
+          )}
         </div>
 
         <div className="topic-articles-grid">
@@ -52,11 +68,11 @@ export default function ExploreTopics({ onSelectStory }) {
               onClick={() =>
                 onSelectStory({
                   id: story.id,
-                  topic: currentTopic.name.toUpperCase(),
+                  topic: currentTopic.name,
                   title: story.title,
                   author: { name: story.author },
                   readingTime: story.readTime,
-                  content: story.content
+                  previewContent: story.content
                 })
               }
               role="button"
@@ -66,11 +82,11 @@ export default function ExploreTopics({ onSelectStory }) {
                   e.preventDefault();
                   onSelectStory({
                     id: story.id,
-                    topic: currentTopic.name.toUpperCase(),
+                    topic: currentTopic.name,
                     title: story.title,
                     author: { name: story.author },
                     readingTime: story.readTime,
-                    content: story.content
+                    previewContent: story.content
                   });
                 }
               }}
@@ -83,7 +99,7 @@ export default function ExploreTopics({ onSelectStory }) {
 
               <div className="preview-article-footer">
                 <span className="preview-article-author">{story.author}</span>
-                <span className="preview-article-action">Read story →</span>
+                <span className="preview-article-action">Read preview →</span>
               </div>
             </div>
           ))}

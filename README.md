@@ -1,141 +1,102 @@
-# 🚀 Chronicle - Modern Blog Management Platform
+# 🖋️ Quill — Editorial Storytelling & Community Platform
 
 > Built for the **GDG on Campus ABESEC (2026–27)** Technical Recruitment | Frontend Development Track
 
 [![React](https://img.shields.io/badge/React-18.x-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-Fast_Bundler-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.x-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![Lucide Icons](https://img.shields.io/badge/Icons-Lucide_React-F56565)](https://lucide.dev/)
+[![Design](https://img.shields.io/badge/Design_System-Light_Editorial-D85A35)](https://github.com/ROhitg-upta/gdg-blog-platform)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 ---
 
 ## 📌 Project Overview
 
-**Chronicle** is a feature-packed, responsive Blog Management Platform engineered to provide writers and readers with an intuitive, seamless content publishing experience. It allows users to browse rich tech/creative articles, filter by categories and keywords, bookmark favorites, engage through comments, and manage (Create, Edit, Delete) their own blog posts with instant local persistence.
+**Quill** is a modern, light-editorial storytelling and community platform engineered for thoughtful reading and intellectual discovery. Rejecting chaotic social feeds and generic templates, Quill emphasizes deliberate typography (Fraunces serif & Inter), warm linen surfaces (`#F8F5EE`), rich terracotta orange accents (`#D85A35`), and bespoke local vector illustrations.
 
-Designed with clean typography, fluid transitions, and Google-inspired modern aesthetics, **Chronicle** showcases frontend architecture best practices, complete responsiveness, accessible UI states, and robust state management.
+### The Entry Flow (Zero-Friction Access)
+* **Root `/`:** Directly renders the warm ivory editorial landing page featuring the signature *"Good stories. Unexpected perspectives."* typography, terracotta underline, curated 3-card mosaic, and topic strip.
+* **One-Click Reader Access:** Entering the community requires **no passwords, no email input, no mandatory signup forms, and no credential validation**. Readers simply click **"Continue as reader"** to initialize a lightweight local reading context and enter the community dashboard immediately.
+* **Direct Access:** Navigating directly to `/community` automatically initializes a neutral local reader profile and displays the full dashboard. Returning to `/` displays the landing page without redirecting away.
 
 ---
 
-## 🌐 Live Demo & Repository
+## 🏛️ Application Architecture & Routes
 
-* **Live Deployment:** [https://chronicle-gdg.vercel.app](https://chronicle-gdg.vercel.app) *(To be updated post-deployment)*
-* **GitHub Repository:** [https://github.com/your-username/gdg-blog-platform](https://github.com/your-username/gdg-blog-platform)
+| Route | Surface Type | Description | Key Interactions |
+| :--- | :--- | :--- | :--- |
+| `/` | **Landing Page** | Approved warm ivory editorial showcase | Wordmark, headline, story mosaic, topic strip, "Continue as reader" |
+| `/community` | **Community Dashboard** | 3-column light editorial workspace | Search, tabs (*For you*, *Following*, *Latest*), topic pills, story previews |
+| `/explore` | **Explore Stream** | Topic-first curated discovery | Deep search, topic browsing, reader preview modal |
+| `/bookmarks` | **Reading Shelf** | Saved stories repository | View saved essays, remove from shelf, instant count badges |
+| `/write` | **Writer Studio** | Honest coming-soon destination | Preview of upcoming typography composition studio |
+| `/my-stories` | **Drafts Archive** | Honest coming-soon destination | Preview of author archives arriving in Module 4 |
+| `/design-system` | **Design System** | Internal component preview | Audit tokens, buttons, inputs, modals, toasts, and artwork |
+| `/login`, `/signup` | **Legacy Fallback** | Deprecated auth routes | Safely redirects with `replaceState` back to `/` |
 
 ---
 
 ## ✨ Features & Functional Matrix
 
-### 1. 🔍 Exploration & Discovery
-* **Interactive Post Feed:** Clean card grid displaying cover images, tags, read duration, author avatars, and publication timestamps.
-* **Search & Real-time Filter:** Instant instant search by title, snippet, or content keyword, paired with multi-category filters (e.g., *Web Dev*, *AI & ML*, *Design*, *Cloud*).
-* **Smart Sorting:** Sort by *Newest First*, *Oldest*, or *Most Popular / Most Liked*.
+### 1. 🔍 Exploration & Editorial Discovery
+* **3-Column Editorial Layout:**
+  * **Left Rail (~220px):** Navigation (*Home*, *Explore*, *Bookmarks*, *My stories*), topic shortcuts (*Technology*, *Design*, *AI*, *Personal Growth*, *Culture*), and writing prompt.
+  * **Central Feed:** Dynamic time-based greeting (*"Good morning / afternoon / evening, reader."*), headline, tabs (*For you*, *Following*, *Latest*), topic filter pills, 1 featured highlight card, flat editorial story rows, and load-more pagination.
+  * **Right Rail (~280px):** Curated Community Picks (3 high-impact essays), quick topic pills, recommended writers with functional Follow/Unfollow toggles, and weekly writing prompt.
+* **Instant Live Search:** Instant search matching title, excerpt, writer name, and topic category with clear button and active result indicator.
+* **Topic Filtering:** One-click topic filtering with orange pill treatment, combined smoothly with search queries and feed tabs.
 
-### 2. 📖 Immersive Reading Experience
-* **Individual Post Detail View:** Full-page reading experience featuring clean typography, estimated reading time, author bio, and categorized badges.
-* **Interactive Engagement:** 
-  * ❤️ **Like System:** Real-time like counter with persistent state.
-  * 🔖 **Bookmarks:** One-click save to bookmarks drawer for offline reading.
-  * 💬 **Comments Section:** Add thoughts, view discussion threads with timestamps and commenter badges.
+### 2. 📖 Immersive Story Preview Modal
+* **Accessible Dialog:** Clicking any story from the landing mosaic, community feed, or right rail opens an accessible light modal (`StoryPreviewModal`).
+* **Rich Editorial Content:** Displays title, writer avatar, date, reading time, local vector artwork, and multiple authentic essay paragraphs.
+* **Shared Bookmarking:** Toggle bookmark directly inside the preview dialog, immediately updating icons across the feed, right rail, and reading shelf.
 
-### 3. ✍️ Content Creation & Management (CRUD)
-* **Create Post Modal / Page:** Rich form with title, category, cover image URL, estimated read time, author name, and markdown/formatted article body.
-* **Edit Existing Posts:** Pre-filled edit form with instant live preview.
-* **Delete with Safety Guard:** Delete confirmation dialog to prevent accidental data loss.
-
-### 4. 🛡️ Robust State Handling
-* **Empty States:** Custom illustrations and descriptive prompts when searches yield 0 results or when bookmarks are empty.
-* **404 / Unavailable Content:** Friendly fallback view with quick navigation back to home when an invalid post ID is requested.
-* **Form Validation:** Client-side validations for required fields, image URLs, and minimal content length.
-
-### 5. 🌟 Bonus Enhancements
-* 🌗 **Dark / Light Mode:** System-aware theme switcher with persistent user preference stored in `localStorage`.
-* 📱 **Full Mobile & Desktop Responsiveness:** Mobile bottom/drawer navigation and fluid grid breakpoints for all viewport sizes.
-* ✨ **Micro-interactions:** Hover effects, toast notifications on post creation/deletion, and smooth transitions.
+### 3. 🔖 Reading Shelf & Local Writer Follows
+* **Local Persistence:** Bookmarks and followed writers are saved browser-locally (`quill.bookmarks.v1` and `quill.follows.v1`).
+* **Instant Feedback:** Toast notifications confirm bookmark actions.
+* **Following Feed:** The *Following* tab dynamically shows essays by followed writers, with an informative empty state if no authors are followed yet.
 
 ---
 
-## 🛠️ Technology Stack
+## 🎨 Visual Design System (Light Editorial)
 
-| Layer | Technology | Purpose |
-| :--- | :--- | :--- |
-| **Framework** | **React.js 18** | Component-driven declarative UI architecture |
-| **Build Tool** | **Vite** | Lightning-fast HMR and optimized production bundling |
-| **Styling** | **Tailwind CSS** | Utility-first responsive styling and seamless dark mode |
-| **Icons** | **Lucide React** | Lightweight, clean modern iconography |
-| **Routing** | **React Router DOM v6** | Client-side routing with clean URLs and dynamic post IDs |
-| **Storage** | **LocalStorage API** | Browser-level persistence for posts, bookmarks, likes, and comments |
+Quill uses a light semantic palette with no dark shells or emerald accents:
 
----
-
-## 📂 Architecture & Directory Structure
-
-```text
-gdg-blog-platform/
-├── public/
-│   └── favicon.svg
-├── src/
-│   ├── assets/              # Static assets and illustration SVGs
-│   ├── components/          # Reusable UI components
-│   │   ├── common/          # Button, Modal, Badge, Toast, EmptyState
-│   │   ├── layout/          # Navbar, Footer, Sidebar, ThemeToggle
-│   │   ├── blog/            # BlogCard, BlogList, BlogDetail, CommentSection
-│   │   └── forms/           # PostForm, SearchBar, CategoryFilter
-│   ├── context/             # Global State Providers
-│   │   ├── BlogContext.jsx  # Posts state, CRUD operations, likes & comments
-│   │   └── ThemeContext.jsx # Dark / Light mode toggle & persistence
-│   ├── data/                # Initial curated seed articles
-│   │   └── initialPosts.js
-│   ├── hooks/               # Custom hooks (useLocalStorage, useDebounce)
-│   ├── pages/               # Route Views
-│   │   ├── HomePage.jsx     # Feed, Search, and Category Explore
-│   │   ├── PostDetailPage.jsx # Full article read view
-│   │   ├── CreatePostPage.jsx # New blog post creation
-│   │   ├── EditPostPage.jsx   # Existing blog post modification
-│   │   ├── BookmarksPage.jsx  # Saved posts repository
-│   │   └── NotFoundPage.jsx   # 404 Error fallback page
-│   ├── utils/               # Formatting helpers (dates, reading time calculation)
-│   ├── App.jsx              # Main router configuration & providers
-│   ├── index.css            # Tailwind directives and custom variables
-│   └── main.jsx             # React DOM entry point
-├── package.json
-├── tailwind.config.js
-├── vite.config.js
-└── README.md
-```
+* **Main Page Background:** `#F8F5EE` (warm linen / paper)
+* **Paper Card Surfaces:** `#FFFDFA`
+* **Secondary Soft Surface:** `#F0EBE2`
+* **Deep Ink Text:** `#1E1C1A`
+* **Secondary Text:** `#696158`
+* **Muted Metadata:** `#82786B`
+* **Fine Border:** `#DDD4C7`
+* **Strong Border:** `#CBBEAE`
+* **Primary Accent:** `#D85A35` (terracotta orange)
+* **Accent Hover:** `#C64C29`
+* **Soft Accent Pill / Selection:** `#F8E4D9`
+* **Artwork Tints:** Lavender (`#DDD5EA`), Peach (`#F0D1BB`), Sage (`#DCE3CC`)
 
 ---
 
-## 🚀 Setup & Local Installation
-
-Follow these steps to run the project locally on your machine:
+## 🚀 Setup & Local Execution
 
 ### 1. Prerequisites
-Ensure you have **Node.js** (v18.0 or higher) and **npm** installed.
-```bash
-node -v
-npm -v
-```
+* **Node.js** (v18 or higher recommended)
+* **npm** or **yarn**
 
-### 2. Clone the Repository
+### 2. Install & Run
 ```bash
-git clone https://github.com/your-username/gdg-blog-platform.git
+# Clone the repository
+git clone https://github.com/ROhitg-upta/gdg-blog-platform.git
 cd gdg-blog-platform
-```
 
-### 3. Install Dependencies
-```bash
+# Install dependencies
 npm install
-```
 
-### 4. Start Development Server
-```bash
+# Start development server
 npm run dev
 ```
-Open your browser and navigate to `http://localhost:5173`.
+Open `http://localhost:5173` in your browser.
 
-### 5. Build for Production
+### 3. Build for Production
 ```bash
 npm run build
 npm run preview
@@ -143,57 +104,14 @@ npm run preview
 
 ---
 
-## 🔐 Prototype Authentication & Demo Credentials
+## 💾 Local Prototype Storage Model
 
-> [!NOTE]
-> **Prototype Simulation Disclaimer:**  
-> This project currently uses browser-local prototype authentication (`quill.prototype.session` and `quill.prototype.users`).
-> * Sessions and user profiles are stored in the current browser's `localStorage`.
-> * It is **not production authentication** and does not provide multi-user cloud synchronization or cryptographic password storage.
-> * A real production release requires a backend authentication provider (e.g., Supabase Auth, Firebase Auth, OAuth2) and server-side authorization guards.
+Quill is a zero-dependency frontend prototype. Reader preferences are persisted within the current browser:
+* `quill.reader.v1`: Active reader identity `{ id: "local-reader", displayName: "Reader", enteredAt: ... }`
+* `quill.bookmarks.v1`: Array of bookmarked story IDs
+* `quill.follows.v1`: Array of followed writer IDs
 
-### Pre-configured Development Demo Credentials
-For testing and reviewing the authenticated flow without manual signup:
-* **Demo Name:** Vishal Gupta
-* **Demo Email:** `demo@quill.local`
-* **Demo Password:** `QuillDemo2026!`
-
-Alternatively, click the **"Use prototype demo account"** action on the `/login` screen to populate credentials immediately.
-
----
-
-## 💾 Data Source & Persistence Strategy
-
-* **Zero External Dependencies Required:** The application is architected to be 100% functional out-of-the-box without requiring an external backend server or database setup.
-* **Curated Initial Seeds:** When a first-time user loads the app, high-quality sample blog posts spanning Web Development, AI, Cloud, and Design are populated from `initialPosts.js`.
-* **Browser LocalStorage Sync:** Every CRUD action (creating a post, updating an article, removing a blog, liking, commenting, or bookmarking) automatically synchronizes with the user's `localStorage`.
-* **Reset to Default Button:** A developer/tester convenience button in settings allows resetting the local dataset back to the initial curated seed posts at any time.
-
----
-
-## 💡 Engineering Challenges & Solutions
-
-### 1. State Persistence & Data Integrity Across Page Reloads
-* **Challenge:** Maintaining updated comments, likes, and user-created posts across route navigations and hard browser reloads without a dedicated SQL/NoSQL backend.
-* **Solution:** Designed a custom `useLocalStorage` synchronization hook integrated with a centralized `BlogContext`. The state is initialized lazily from `localStorage` (falling back to curated mock data) and written atomically upon every mutation.
-
-### 2. Smooth Dark Mode without Flash of Unstyled Content (FOUC)
-* **Challenge:** Preventing jarring flickers between light and dark modes during initial render.
-* **Solution:** Embedded theme initialization logic that syncs with both `localStorage` and `prefers-color-scheme`, instantly toggling the `dark` class on the root `document.documentElement` element before mounting child trees.
-
-### 3. Search and Filter Performance
-* **Challenge:** Real-time text searches against post titles and content could cause unnecessary re-renders on every keystroke.
-* **Solution:** Implemented a lightweight debounce mechanism (`useDebounce`) coupled with React `useMemo` for filtering and sorting, ensuring instantaneous 60fps UI feedback.
-
----
-
-## 🎯 Alignment with GDG Evaluation Criteria
-
-* **UI & Responsiveness:** Clean modern typography, accessible contrast, mobile bottom-nav, dynamic grid layout adapting flawlessly from mobile screens to 4K displays.
-* **Functionality:** 100% coverage of all required features: Explore, View, Search, Filter, Create, Edit, Delete, plus empty and 404 state boundaries.
-* **Code Quality:** Modular component hierarchy, clear naming conventions, separated business logic into custom hooks/contexts, and clean Git commits.
-* **Problem-Solving:** Zero-dependency offline persistence architecture allowing reviewers to immediately test CRUD flows without setting up API keys or external servers.
-* **Creativity & Bonus Features:** Light/Dark toggle, bookmarks system, interactive comments, reading time calculator, and smooth micro-interactions.
+All obsolete prototype authentication keys (`quill.prototype.users` and `quill.prototype.session`) have been safely deprecated and purged. `localStorage.clear()` is never invoked.
 
 ---
 

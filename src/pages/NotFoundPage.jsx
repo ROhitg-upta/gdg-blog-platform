@@ -1,11 +1,8 @@
 import React from 'react';
-import { useAuth } from '../context/AuthContext';
-import { PrimaryButton } from '../components/ui/Button';
+import { PrimaryButton, SecondaryButton } from '../components/ui/Button';
 import { EditorialAsterisk } from '../components/editorial/EditorialDecorations';
 
 export default function NotFoundPage({ onNavigate }) {
-  const { isAuthenticated } = useAuth();
-
   return (
     <div
       style={{
@@ -15,7 +12,7 @@ export default function NotFoundPage({ onNavigate }) {
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: 'var(--color-paper, #F8F5EE)',
-        color: 'var(--color-text-inverse, #1E1C1A)',
+        color: 'var(--color-text-primary, #1E1C1A)',
         padding: 'var(--space-6)',
         textAlign: 'center'
       }}
@@ -37,11 +34,14 @@ export default function NotFoundPage({ onNavigate }) {
         The passage you are looking for has been moved, archived, or does not exist.
       </p>
 
-      <PrimaryButton
-        onClick={() => onNavigate(isAuthenticated ? '/community' : '/login')}
-      >
-        {isAuthenticated ? 'Return to your reading room' : 'Return to sign in'}
-      </PrimaryButton>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+        <PrimaryButton onClick={() => onNavigate('/community')}>
+          Return to community
+        </PrimaryButton>
+        <SecondaryButton onClick={() => onNavigate('/')}>
+          Return to landing
+        </SecondaryButton>
+      </div>
     </div>
   );
 }

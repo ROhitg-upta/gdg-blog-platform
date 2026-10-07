@@ -1,8 +1,18 @@
 @import './quill-tokens.css';
 
 /* ==========================================================================
-   QUILL BASE STYLES & FOUNDATIONAL UTILITIES
+   QUILL BASE STYLES & FOUNDATIONAL UTILITIES (LIGHT EDITORIAL)
    ========================================================================== */
+
+:root {
+  --sidebar-width: 220px;
+  --sidebar-compact-width: 64px;
+  --right-rail-width: 280px;
+  --gutter-desktop: 2rem;
+  --gutter-mobile: 1.25rem;
+  --reading-column-width: 680px;
+  --card-padding: 1.5rem;
+}
 
 /* Universal Reset */
 *, *::before, *::after {
@@ -23,7 +33,7 @@ html {
 
 body {
   background-color: var(--color-paper, #F8F5EE);
-  color: var(--color-text-inverse, #1E1C1A);
+  color: var(--color-text-primary, #1E1C1A);
   font-family: var(--font-sans);
   line-height: var(--leading-normal);
   -webkit-font-smoothing: antialiased;
@@ -162,8 +172,8 @@ img, svg {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: var(--color-ink);
-  color: var(--color-text-primary);
+  background-color: var(--color-paper, #F8F5EE);
+  color: var(--color-text-primary, #1E1C1A);
 }
 
 /* Standard Page Container */
@@ -216,7 +226,7 @@ img, svg {
 .quill-dashboard-layout {
   display: grid;
   grid-template-columns: var(--sidebar-width) minmax(0, 1fr) var(--right-rail-width);
-  gap: var(--space-6);
+  gap: var(--space-8);
   width: 100%;
   max-width: var(--container-max-width);
   margin: 0 auto;
@@ -236,6 +246,7 @@ img, svg {
   .quill-dashboard-layout {
     grid-template-columns: 1fr;
     padding: var(--space-4) var(--gutter-mobile);
+    gap: var(--space-4);
   }
   .quill-dashboard-sidebar {
     display: none;
@@ -257,11 +268,12 @@ img, svg {
 
 /* Card Surface Styling */
 .quill-surface-card {
-  background-color: var(--color-ink-elevated);
+  background-color: var(--color-surface-card, #FFFDFA);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: var(--card-padding);
-  transition: border-color var(--transition-base), transform var(--transition-base);
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition-fast), transform var(--transition-fast);
 }
 
 .quill-surface-card:hover {
@@ -270,8 +282,8 @@ img, svg {
 
 /* Paper Surface Variant */
 .quill-surface-paper {
-  background-color: var(--color-paper);
-  color: var(--color-ink);
+  background-color: var(--color-paper, #F8F5EE);
+  color: var(--color-text-primary, #1E1C1A);
   border-radius: var(--radius-md);
   padding: var(--card-padding);
 }

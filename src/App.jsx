@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { AuthProvider, useAuth } from './context/AuthContext';
-import { AuthHydrationLoading } from './components/auth/AuthGuard';
-import LoginPage from './pages/LoginPage';
-import SignupPage from './pages/SignupPage';
-import OnboardingPage from './pages/OnboardingPage';
-import CommunityPlaceholderPage from './pages/CommunityPlaceholderPage';
-import NotFoundPage from './pages/NotFoundPage';
+import { ReaderProvider } from './context/ReaderContext';
+import LandingPage from './pages/LandingPage';
+import CommunityPage from './pages/CommunityPage';
+import BookmarksPage from './pages/BookmarksPage';
+import WriterStudioComingSoonPage from './pages/WriterStudioComingSoonPage';
 import DesignSystemPreview from './pages/DesignSystemPreview';
+import NotFoundPage from './pages/NotFoundPage';
 
-function AppContent() {
-  const { user, isAuthenticated, isHydrating } = useAuth();
-  const [currentPath, setCurrentPath] = useState(
-    typeof window !== 'undefined' ? window.location.pathname || '/' : '/'
-  );
+function AppRouter() {
+  const [currentPath, setCurrentPath] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.location.pathname || '/';
+    }
+    return '/';
+  });
 
   // Sync navigation on browser back/forward buttons
   useEffect(() => {
@@ -23,100 +24,66 @@ function AppContent() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  const navigate = (path) => {
-    window.history.pushState({}, '', path);
-    setCurrentPath(path);
+  const navigate = (path, replace = false) => {
+    if (replace) {
+      window.history.replaceState({}, '', path);
+    } else {
+      window.history.pushState({}, '', path);
+    }
+    // Extract pathname in case path includes query parameters like /community?topic=Design
+    const [pathname] = path.split('?');
+    setCurrentPath(pathname);
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
-  // Wait for initial session hydration to eliminate wrong-page flicker
-  if (isHydrating) {
-    return <AuthHydrationLoading />;
+  // Legacy authentication routes: redirect with replace to '/'
+  if (currentPath === '/login' || currentPath === '/signup' || currentPath === '/onboarding') {
+    navigate('/', true);
+    return <LandingPage onNavigate={navigate} />;
   }
 
-  // Root path resolution
+  // 1. Root route: ALWAYS renders approved warm ivory editorial landing page
   if (currentPath === '/') {
-    if (isAuthenticated) {
-      if (user && !user.onboardingComplete) {
-        navigate('/onboarding');
-      } else {
-        navigate('/community');
-      }
-    } else {
-      navigate('/login');
-    }
-    return <AuthHydrationLoading />;
+    return <LandingPage onNavigate={navigate} />;
   }
 
-  // /login route
-  if (currentPath === '/login') {
-    if (isAuthenticated) {
-      if (user && !user.onboardingComplete) {
-        navigate('/onboarding');
-      } else {
-        navigate('/community');
-      }
-      return <AuthHydrationLoading />;
-    }
-    return <LoginPage onNavigate={navigate} />;
-  }
-
-  // /signup route
-  if (currentPath === '/signup') {
-    if (isAuthenticated) {
-      if (user && !user.onboardingComplete) {
-        navigate('/onboarding');
-      } else {
-        navigate('/community');
-      }
-      return <AuthHydrationLoading />;
-    }
-    return <SignupPage onNavigate={navigate} />;
-  }
-
-  // /onboarding route
-  if (currentPath === '/onboarding') {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return <AuthHydrationLoading />;
-    }
-    if (user && user.onboardingComplete) {
-      navigate('/community');
-      return <AuthHydrationLoading />;
-    }
-    return <OnboardingPage onNavigate={navigate} />;
-  }
-
-  // /community protected route (Module 2 placeholder)
+  // 2. Community Dashboard route
   if (currentPath === '/community') {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return <AuthHydrationLoading />;
-    }
-    if (user && !user.onboardingComplete) {
-      navigate('/onboarding');
-      return <AuthHydrationLoading />;
-    }
-    return <CommunityPlaceholderPage onNavigate={navigate} />;
+    return <CommunityPage onNavigate={navigate} initialRoute="/community" />;
   }
 
-  // /design-system internal preview route
+  // 3. Explore route (reuses community dashboard shell with exploration focus)
+  if (currentPath === '/explore') {
+    return <CommunityPage onNavigate={navigate} initialRoute="/explore" />;
+  }
+
+  // 4. Saved Bookmarks Shelf route
+  if (currentPath === '/bookmarks') {
+    return <BookmarksPage onNavigate={navigate} />;
+  }
+
+  // 5. Future Writer Studio & Story Management destinations
+  if (currentPath === '/write') {
+    return <WriterStudioComingSoonPage onNavigate={navigate} route="/write" />;
+  }
+
+  if (currentPath === '/my-stories') {
+    return <WriterStudioComingSoonPage onNavigate={navigate} route="/my-stories" />;
+  }
+
+  // 6. Internal Design System Showcase
   if (currentPath === '/design-system') {
-    return (
-      <DesignSystemPreview
-        onBackToApp={() => navigate(isAuthenticated ? '/community' : '/login')}
-      />
-    );
+    return <DesignSystemPreview onBackToApp={() => navigate('/community')} />;
   }
 
-  // Unknown route
+  // 7. 404 Fallback
   return <NotFoundPage onNavigate={navigate} />;
 }
 
 export default function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <ReaderProvider>
+      <AppRouter />
+    </ReaderProvider>
   );
 }

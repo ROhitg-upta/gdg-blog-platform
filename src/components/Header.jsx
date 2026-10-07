@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 
 export default function Header({
   onNavClick,
-  onSignInClick,
-  onStartWritingClick
+  onContinueReader,
+  onStartWritingClick,
+  onExploreClick
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -20,7 +21,11 @@ export default function Header({
 
   const handleMobileNav = (targetId) => {
     setMobileMenuOpen(false);
-    onNavClick(targetId);
+    if (targetId === 'explore' && onExploreClick) {
+      onExploreClick();
+    } else {
+      onNavClick(targetId);
+    }
   };
 
   return (
@@ -44,7 +49,10 @@ export default function Header({
           <button
             type="button"
             className="nav-link"
-            onClick={() => onNavClick('explore')}
+            onClick={() => {
+              if (onExploreClick) onExploreClick();
+              else onNavClick('explore');
+            }}
           >
             Explore
           </button>
@@ -69,9 +77,10 @@ export default function Header({
           <button
             type="button"
             className="btn-sign-in"
-            onClick={onSignInClick}
+            onClick={onContinueReader}
+            aria-label="Continue to community as reader"
           >
-            Sign in
+            Continue as reader
           </button>
           <button
             type="button"
@@ -137,13 +146,13 @@ export default function Header({
           <button
             type="button"
             className="btn-sign-in"
-            style={{ textAlign: 'left', padding: '0.4rem 0' }}
+            style={{ textAlign: 'left', padding: '0.5rem 0' }}
             onClick={() => {
               setMobileMenuOpen(false);
-              onSignInClick();
+              onContinueReader();
             }}
           >
-            Sign in
+            Continue as reader
           </button>
           <button
             type="button"

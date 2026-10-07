@@ -1,66 +1,63 @@
 /**
  * ============================================================================
- * QUILL DESIGN SYSTEM TOKENS
+ * QUILL DESIGN SYSTEM TOKENS (LIGHT EDITORIAL PALETTE)
  * Core source of truth for colors, typography, spacing, shapes, and motion.
+ * Default surface is warm cream/paper (#F8F5EE) with terracotta orange (#D85A35).
  * ============================================================================
  */
 
 :root {
   /* --------------------------------------------------------------------------
-     1. COLOR SYSTEM (EDITORIAL INK & WARM PAPER)
+     1. COLOR SYSTEM (WARM LIGHT EDITORIAL)
      -------------------------------------------------------------------------- */
   
-  /* Core Ink (Dark Shell) */
-  --color-ink: #141310;
-  --color-ink-elevated: #1C1A16;
-  --color-ink-muted: #292620;
-  --color-ink-subtle: #332F27;
-  
-  /* Core Paper (Warm Surfaces matching reference image) */
-  --color-paper: #F8F5EE;
-  --color-paper-strong: #FFFEFC;
-  --color-paper-muted: #EBE5D8;
-  
-  /* Text Roles */
-  --color-text-primary: #F5F0E6;
-  --color-text-secondary: #B9B1A4;
-  --color-text-muted: #847C70;
-  --color-text-inverse: #141310;
-  
-  /* Borders & Dividers */
-  --color-border: rgba(244, 239, 229, 0.12);
-  --color-border-strong: rgba(244, 239, 229, 0.22);
-  --color-border-subtle: rgba(244, 239, 229, 0.06);
-  
-  /* Accent System (Refined Emerald Green) */
-  --color-accent: #35B84B;
-  --color-accent-hover: #46C85C;
-  --color-accent-pressed: #249B39;
-  --color-accent-soft: rgba(53, 184, 75, 0.14);
-  --color-accent-border: rgba(53, 184, 75, 0.35);
-  --color-accent-text: #071A0B;
-  
-  /* Feedback Palette (Restrained, Non-Neon) */
-  --color-success: #35B84B;
-  --color-success-soft: rgba(53, 184, 75, 0.12);
-  --color-warning: #D99B26;
-  --color-warning-soft: rgba(217, 155, 38, 0.12);
-  --color-error: #D9534F;
-  --color-error-soft: rgba(217, 83, 79, 0.12);
-  --color-info: #5A738E;
-  --color-info-soft: rgba(90, 115, 142, 0.12);
+  /* Core Background & Surfaces */
+  --color-paper: #F8F5EE;              /* Main page background */
+  --color-surface-base: #F8F5EE;       /* Base surface */
+  --color-surface-card: #FFFDFA;       /* Paper card / elevated paper */
+  --color-surface-secondary: #F0EBE2;  /* Soft secondary surface */
+  --color-surface-hover: rgba(30, 28, 26, 0.04);
+  --color-surface-disabled: rgba(30, 28, 26, 0.05);
 
-  /* Surface Levels */
-  --color-surface-base: var(--color-ink);
-  --color-surface-card: var(--color-ink-elevated);
-  --color-surface-elevated: var(--color-ink-muted);
-  --color-surface-hover: rgba(244, 239, 229, 0.04);
-  --color-surface-disabled: rgba(244, 239, 229, 0.05);
+  /* Text Roles */
+  --color-text-primary: #1E1C1A;       /* Deep ink text */
+  --color-text-secondary: #696158;     /* Secondary reading text */
+  --color-text-muted: #82786B;         /* Muted metadata */
+  --color-text-inverse: #FFFDFA;       /* Light text on dark accents */
+
+  /* Borders & Dividers */
+  --color-border: #DDD4C7;             /* Fine warm border */
+  --color-border-strong: #CBBEAE;      /* Strong structural border */
+  --color-border-subtle: #E8E1D5;      /* Subtle divider line */
+
+  /* Primary Accent System (Warm Terracotta Orange) */
+  --color-accent: #D85A35;
+  --color-accent-hover: #C64C29;
+  --color-accent-pressed: #B5411E;
+  --color-accent-soft: #F8E4D9;
+  --color-accent-border: rgba(216, 90, 53, 0.35);
+  --color-accent-text: #FFFFFF;
+
+  /* Artwork Tints */
+  --color-art-lavender: #DDD5EA;
+  --color-art-peach: #F0D1BB;
+  --color-art-sage: #DCE3CC;
+  --color-art-ink: #1E1C1A;
+
+  /* Feedback Palette (Restrained, Warm Tone) */
+  --color-success: #3E8A54;
+  --color-success-soft: #E8F4EC;
+  --color-warning: #C7771B;
+  --color-warning-soft: #FAF0E3;
+  --color-error: #C94236;
+  --color-error-soft: #FAECEB;
+  --color-info: #4A6E82;
+  --color-info-soft: #EBF3F7;
 
   /* Overlay & States */
-  --color-overlay: rgba(14, 13, 11, 0.82);
-  --color-focus-ring: rgba(53, 184, 75, 0.7);
-  --color-selection: var(--color-accent-soft);
+  --color-overlay: rgba(30, 28, 26, 0.45);
+  --color-focus-ring: rgba(216, 90, 53, 0.55);
+  --color-selection: #F8E4D9;
 
   /* --------------------------------------------------------------------------
      2. TYPOGRAPHY
@@ -69,7 +66,7 @@
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   
   /* Type Scale */
-  --text-size-eyebrow: 0.72rem;
+  --text-size-eyebrow: 0.75rem;
   --text-size-caption: 0.8125rem;
   --text-size-meta: 0.85rem;
   --text-size-body-sm: 0.9rem;
@@ -92,7 +89,7 @@
   --tracking-tight: -0.03em;
   --tracking-normal: 0em;
   --tracking-wide: 0.05em;
-  --tracking-eyebrow: 0.14em;
+  --tracking-eyebrow: 0.12em;
 
   /* Font Weights */
   --weight-regular: 400;
@@ -101,62 +98,48 @@
   --weight-bold: 700;
 
   /* --------------------------------------------------------------------------
-     3. SPACING SCALE (4px / 8px Increments)
+     3. SPACING & LAYOUT SYSTEM
      -------------------------------------------------------------------------- */
-  --space-1: 0.25rem;  /* 4px */
-  --space-2: 0.5rem;   /* 8px */
-  --space-3: 0.75rem;  /* 12px */
-  --space-4: 1rem;     /* 16px */
-  --space-5: 1.25rem;  /* 20px */
-  --space-6: 1.5rem;   /* 24px */
-  --space-8: 2rem;     /* 32px */
-  --space-10: 2.5rem;  /* 40px */
-  --space-12: 3rem;    /* 48px */
-  --space-16: 4rem;    /* 64px */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
 
-  /* Layout Dimensions */
-  --header-height: 64px;
-  --sidebar-width: 240px;
-  --sidebar-compact-width: 68px;
-  --right-rail-width: 320px;
-  --container-max-width: 1240px;
-  --reading-column-width: 680px;
-  --card-padding: 1.35rem;
-  --gutter-mobile: 1rem;
-  --gutter-desktop: 2rem;
+  --container-max-width: 1440px;
+  --feed-max-width: 740px;
+  --header-height: 72px;
 
   /* --------------------------------------------------------------------------
-     4. SHAPES, BORDERS & ELEVATIONS
+     4. SHAPES & CORNERS
      -------------------------------------------------------------------------- */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
   --radius-pill: 9999px;
 
-  --border-width-hairline: 1px;
-  --border-width-focus: 2px;
-
-  /* Restrained Elevations */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.28);
-  --shadow-md: 0 6px 20px -2px rgba(0, 0, 0, 0.42);
-  --shadow-lg: 0 16px 44px -4px rgba(0, 0, 0, 0.6);
+  /* --------------------------------------------------------------------------
+     5. SHADOWS & ELEVATION
+     -------------------------------------------------------------------------- */
+  --shadow-sm: 0 1px 3px rgba(30, 28, 26, 0.06), 0 1px 2px rgba(30, 28, 26, 0.03);
+  --shadow-md: 0 4px 12px rgba(30, 28, 26, 0.08), 0 2px 4px rgba(30, 28, 26, 0.04);
+  --shadow-lg: 0 16px 36px rgba(30, 28, 26, 0.12), 0 6px 12px rgba(30, 28, 26, 0.06);
 
   /* --------------------------------------------------------------------------
-     5. MOTION & TRANSITIONS
+     6. MOTION & TRANSITIONS
      -------------------------------------------------------------------------- */
-  --transition-fast: 120ms cubic-bezier(0.16, 1, 0.3, 1);
-  --transition-base: 180ms cubic-bezier(0.16, 1, 0.3, 1);
-  --transition-slow: 280ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 240ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-slow: 380ms cubic-bezier(0.16, 1, 0.3, 1);
+
   --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
   --hover-lift: -2px;
-}
-
-/* Reduced Motion Safety */
-@media (prefers-reduced-motion: reduce) {
-  :root {
-    --transition-fast: 0.01ms !important;
-    --transition-base: 0.01ms !important;
-    --transition-slow: 0.01ms !important;
-    --hover-lift: 0px !important;
-  }
 }
