@@ -322,14 +322,15 @@ export default function CommandPaletteModal({ isOpen, onClose, onNavigate }) {
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="Command Palette"
+        aria-label="Quick Directory"
         className="quill-command-modal-dialog"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search Input Bar */}
         <div className="quill-command-search-header">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="currentColor" fillOpacity="0.2" />
           </svg>
 
           <input
@@ -340,7 +341,7 @@ export default function CommandPaletteModal({ isOpen, onClose, onNavigate }) {
               setQuery(e.target.value);
               setSelectedIndex(0);
             }}
-            placeholder="Type a command, essay, collection, or atmosphere..."
+            placeholder="Search stories, topics, collections, or reading modes..."
             className="quill-command-search-input"
           />
 
@@ -409,7 +410,7 @@ export default function CommandPaletteModal({ isOpen, onClose, onNavigate }) {
             <span><kbd className="quill-cmd-kbd">↑</kbd> <kbd className="quill-cmd-kbd">↓</kbd> navigate</span>
             <span><kbd className="quill-cmd-kbd">↵</kbd> select</span>
           </div>
-          <span>Quill Command Center</span>
+          <span>Quill Quick Directory</span>
         </div>
       </div>
     </div>

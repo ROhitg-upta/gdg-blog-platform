@@ -129,17 +129,26 @@ function AppRouter() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  // Global keyboard shortcut for ⌘K / Ctrl+K
+  // Global keyboard shortcut for Ctrl+K or '/'
   useEffect(() => {
     const handleGlobalKey = (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setCommandPaletteOpen((prev) => !prev);
+        return;
+      }
+      if (e.key === '/' && !commandPaletteOpen) {
+        const tag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+        const isEditable = document.activeElement ? document.activeElement.isContentEditable : false;
+        if (tag !== 'input' && tag !== 'textarea' && !isEditable) {
+          e.preventDefault();
+          setCommandPaletteOpen(true);
+        }
       }
     };
     window.addEventListener('keydown', handleGlobalKey);
     return () => window.removeEventListener('keydown', handleGlobalKey);
-  }, []);
+  }, [commandPaletteOpen]);
 
   const navigate = (path, replace = false) => {
     const [pathname] = path.split('?');

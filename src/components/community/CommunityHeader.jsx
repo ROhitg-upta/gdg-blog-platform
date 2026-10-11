@@ -123,8 +123,6 @@ export default function CommunityHeader({
               setSearchFocused(false);
             }}
             placeholder="Search stories, topics, or writers..."
-            shortcut="⌘K"
-            onShortcutClick={onOpenCommandPalette}
           />
 
           {/* Search Suggestions Popover */}
@@ -237,22 +235,39 @@ export default function CommunityHeader({
 
         {/* Right: Command Palette, Write action & Reader Avatar Menu */}
         <div className="quill-header-actions">
-          {/* Quick Command Palette Button */}
+          {/* Quick Bookmarks Button */}
+          <button
+            type="button"
+            onClick={() => onNavigate('/bookmarks')}
+            className="quill-header-saved-btn"
+            title={`Saved Bookmarks (${bookmarks.length})`}
+            aria-label="View saved bookmarks"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+            </svg>
+            <span className="quill-saved-label">Saved</span>
+            {bookmarks.length > 0 && (
+              <span className="quill-saved-count">{bookmarks.length}</span>
+            )}
+          </button>
+
+          {/* Quick Directory / Explore Modal Button */}
           {onOpenCommandPalette && (
             <button
               type="button"
               onClick={onOpenCommandPalette}
               className="quill-command-btn"
-              title="Command Palette (Ctrl+K or ⌘K)"
-              aria-label="Open command palette"
+              title="Explore & Quick Directory (Ctrl+K or /)"
+              aria-label="Open quick directory"
             >
               <span className="quill-cmd-icon" aria-hidden="true">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="currentColor" fillOpacity="0.2" />
                 </svg>
               </span>
-              <span className="quill-cmd-label">Commands</span>
-              <kbd className="quill-cmd-kbd">⌘K</kbd>
+              <span className="quill-cmd-label">Explore</span>
             </button>
           )}
 

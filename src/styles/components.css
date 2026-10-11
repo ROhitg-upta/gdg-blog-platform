@@ -752,15 +752,44 @@
   justify-content: center;
 }
 
-.quill-command-btn .quill-cmd-kbd {
-  font-size: 0.68rem;
-  font-weight: 600;
-  padding: 1px 5px;
-  border-radius: 4px;
-  background-color: var(--color-surface-secondary);
+/* Saved Bookmarks Button in Header */
+.quill-header-saved-btn {
+  height: 38px;
+  min-height: 38px;
+  padding: 0 0.85rem;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-surface-card, #FFFDFA);
   border: 1px solid var(--color-border);
-  color: var(--color-text-muted);
-  font-family: inherit;
+  color: var(--color-text-secondary);
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: var(--weight-medium);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.quill-header-saved-btn:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-accent);
+  background-color: var(--color-surface-secondary);
+}
+
+.quill-header-saved-btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.quill-header-saved-btn .quill-saved-count {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-accent-soft);
+  color: var(--color-accent);
   line-height: 1.2;
 }
 
@@ -825,11 +854,13 @@
 
 /* Responsive adjustments for header controls */
 @media (max-width: 900px) {
-  .quill-command-btn .quill-cmd-label {
+  .quill-command-btn .quill-cmd-label,
+  .quill-header-saved-btn .quill-saved-label {
     display: none;
   }
-  .quill-command-btn {
-    padding: 0 0.6rem;
+  .quill-command-btn,
+  .quill-header-saved-btn {
+    padding: 0 0.65rem;
   }
 }
 
@@ -839,6 +870,12 @@
   }
   .quill-header-write-btn {
     padding: 0 0.65rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .quill-header-saved-btn {
+    display: none;
   }
 }
 

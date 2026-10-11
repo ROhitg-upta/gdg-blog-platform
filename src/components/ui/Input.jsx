@@ -84,8 +84,8 @@ export function SearchInput({
           type="button"
           onClick={onShortcutClick}
           className="quill-search-shortcut-badge"
-          aria-label="Open command palette"
-          title="Open Command Palette (⌘K)"
+          aria-label="Open quick directory"
+          title="Open Quick Directory (Ctrl+K)"
         >
           {shortcut}
         </button>
