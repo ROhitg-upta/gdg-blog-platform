@@ -43,6 +43,8 @@ export function SearchInput({
   placeholder = 'Search stories, topics, or authors...',
   disabled = false,
   className = '',
+  shortcut = null,
+  onShortcutClick = null,
   ...props
 }) {
   return (
@@ -65,7 +67,7 @@ export function SearchInput({
         {...props}
       />
 
-      {value && onClear && (
+      {value && onClear ? (
         <button
           type="button"
           onClick={onClear}
@@ -77,7 +79,17 @@ export function SearchInput({
             <line x1="2" y1="10" x2="10" y2="2" strokeLinecap="round" />
           </svg>
         </button>
-      )}
+      ) : !value && shortcut ? (
+        <button
+          type="button"
+          onClick={onShortcutClick}
+          className="quill-search-shortcut-badge"
+          aria-label="Open command palette"
+          title="Open Command Palette (⌘K)"
+        >
+          {shortcut}
+        </button>
+      ) : null}
     </div>
   );
 }

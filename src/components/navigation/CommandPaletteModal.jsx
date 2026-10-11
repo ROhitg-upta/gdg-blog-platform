@@ -2,6 +2,112 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useReader } from '../../hooks/useReader';
 import { getAllHydratedStories } from '../../data/communityData';
 
+function CommandIcon({ type }) {
+  const props = {
+    width: 15,
+    height: 15,
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round'
+  };
+
+  switch (type) {
+    case 'home':
+      return (
+        <svg {...props}>
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          <polyline points="9 22 9 12 15 12 15 22" />
+        </svg>
+      );
+    case 'explore':
+      return (
+        <svg {...props}>
+          <circle cx="12" cy="12" r="10" />
+          <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
+        </svg>
+      );
+    case 'bookmark':
+      return (
+        <svg {...props}>
+          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+        </svg>
+      );
+    case 'write':
+      return (
+        <svg {...props}>
+          <path d="M12 20h9" />
+          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+        </svg>
+      );
+    case 'stories':
+      return (
+        <svg {...props}>
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+          <line x1="16" y1="13" x2="8" y2="13" />
+          <line x1="16" y1="17" x2="8" y2="17" />
+        </svg>
+      );
+    case 'profile':
+      return (
+        <svg {...props}>
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+          <circle cx="12" cy="7" r="4" />
+        </svg>
+      );
+    case 'collection':
+      return (
+        <svg {...props}>
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+        </svg>
+      );
+    case 'ambience-paper':
+      return (
+        <svg {...props}>
+          <circle cx="12" cy="12" r="5" />
+          <line x1="12" y1="1" x2="12" y2="3" />
+          <line x1="12" y1="21" x2="12" y2="23" />
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+          <line x1="1" y1="12" x2="3" y2="12" />
+          <line x1="21" y1="12" x2="23" y2="12" />
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+        </svg>
+      );
+    case 'ambience-sepia':
+      return (
+        <svg {...props}>
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+        </svg>
+      );
+    case 'ambience-studio':
+      return (
+        <svg {...props}>
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+          <line x1="3" y1="9" x2="21" y2="9" />
+          <line x1="9" y1="21" x2="9" y2="9" />
+        </svg>
+      );
+    case 'essay':
+    default:
+      return (
+        <svg {...props}>
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+          <line x1="16" y1="13" x2="8" y2="13" />
+          <line x1="16" y1="17" x2="8" y2="17" />
+          <polyline points="10 9 9 9 8 9" />
+        </svg>
+      );
+  }
+}
+
 export default function CommandPaletteModal({ isOpen, onClose, onNavigate }) {
   const { profilePreferences, updateProfilePreferences, userStories } = useReader();
   const [query, setQuery] = useState('');
@@ -35,7 +141,7 @@ export default function CommandPaletteModal({ isOpen, onClose, onNavigate }) {
         category: 'Navigation',
         title: 'Community Dashboard',
         subtitle: 'Editorial home, curated feed, and active discussions',
-        icon: '🏠',
+        iconType: 'home',
         action: () => onNavigate('/community')
       },
       {
@@ -43,7 +149,7 @@ export default function CommandPaletteModal({ isOpen, onClose, onNavigate }) {
         category: 'Navigation',
         title: 'Explore Topics',
         subtitle: 'Filter essays across Technology, Design, AI, and Culture',
-        icon: '🧭',
+        iconType: 'explore',
         action: () => onNavigate('/explore')
       },
       {
@@ -51,7 +157,7 @@ export default function CommandPaletteModal({ isOpen, onClose, onNavigate }) {
         category: 'Navigation',
         title: 'Reading Shelves & Bookmarks',
         subtitle: 'Your organized custom shelves and saved essays',
-        icon: '🔖',
+        iconType: 'bookmark',
         action: () => onNavigate('/bookmarks')
       },
       {
@@ -59,7 +165,7 @@ export default function CommandPaletteModal({ isOpen, onClose, onNavigate }) {
         category: 'Navigation',
         title: 'Writer Studio',
         subtitle: 'Draft a new essay with structured block editor & outline',
-        icon: '✍️',
+        iconType: 'write',
         action: () => onNavigate('/write')
       },
       {
@@ -67,7 +173,7 @@ export default function CommandPaletteModal({ isOpen, onClose, onNavigate }) {
         category: 'Navigation',
         title: 'My Stories & Drafts',
         subtitle: 'Manage local drafts, published essays, and archives',
-        icon: '📂',
+        iconType: 'stories',
         action: () => onNavigate('/my-stories')
       },
       {
@@ -75,31 +181,31 @@ export default function CommandPaletteModal({ isOpen, onClose, onNavigate }) {
         category: 'Navigation',
         title: 'Reading Room & Stats',
         subtitle: 'Reading pace, visual atmosphere, and local data export',
-        icon: '☕',
+        iconType: 'profile',
         action: () => onNavigate('/profile')
       },
       {
         id: 'nav-collection-attention',
-        category: 'Navigation',
+        category: 'Collections',
         title: 'Collection: The Craft of Attention',
         subtitle: 'Curated essays on focus, quiet craft, and digital stillness',
-        icon: '📚',
+        iconType: 'collection',
         action: () => onNavigate('/collections/craft-of-attention')
       },
       {
         id: 'nav-collection-minds',
-        category: 'Navigation',
+        category: 'Collections',
         title: 'Collection: Architects of Quiet Minds',
         subtitle: 'Design, ergonomics, and serene human interfaces',
-        icon: '📚',
+        iconType: 'collection',
         action: () => onNavigate('/collections/architects-of-quiet-minds')
       },
       {
         id: 'action-ambience-paper',
-        category: 'Reading Ambiance',
-        title: 'Ambiance: Paper (Default)',
+        category: 'Atmosphere',
+        title: 'Atmosphere: Paper (Warm Ivory)',
         subtitle: 'Warm ivory linen surface with deep ink typography',
-        icon: '📜',
+        iconType: 'ambience-paper',
         action: () => {
           updateProfilePreferences?.({ ambience: 'paper' });
           onClose();
@@ -107,10 +213,10 @@ export default function CommandPaletteModal({ isOpen, onClose, onNavigate }) {
       },
       {
         id: 'action-ambience-sepia',
-        category: 'Reading Ambiance',
-        title: 'Ambiance: Sepia',
+        category: 'Atmosphere',
+        title: 'Atmosphere: Sepia (Sunlit Parchment)',
         subtitle: 'Golden sunlit parchment for comfortable reading',
-        icon: '📖',
+        iconType: 'ambience-sepia',
         action: () => {
           updateProfilePreferences?.({ ambience: 'sepia' });
           onClose();
@@ -118,10 +224,10 @@ export default function CommandPaletteModal({ isOpen, onClose, onNavigate }) {
       },
       {
         id: 'action-ambience-studio',
-        category: 'Reading Ambiance',
-        title: 'Ambiance: Studio',
+        category: 'Atmosphere',
+        title: 'Atmosphere: Studio (Cool Gray)',
         subtitle: 'Neutral cool gray paper for crisp editorial focus',
-        icon: '🖊️',
+        iconType: 'ambience-studio',
         action: () => {
           updateProfilePreferences?.({ ambience: 'studio' });
           onClose();
@@ -157,7 +263,7 @@ export default function CommandPaletteModal({ isOpen, onClose, onNavigate }) {
         category: 'Essays',
         title: s.title,
         subtitle: `${s.author?.name || 'Local Author'} · ${s.topic || 'Essay'}`,
-        icon: '📄',
+        iconType: 'essay',
         action: () => onNavigate(`/story/${s.slug}`)
       }));
 
@@ -209,7 +315,7 @@ export default function CommandPaletteModal({ isOpen, onClose, onNavigate }) {
         display: 'flex',
         alignItems: 'flex-start',
         justifyContent: 'center',
-        paddingTop: '12vh'
+        paddingTop: '10vh'
       }}
       onClick={onClose}
     >
@@ -217,35 +323,13 @@ export default function CommandPaletteModal({ isOpen, onClose, onNavigate }) {
         role="dialog"
         aria-modal="true"
         aria-label="Command Palette"
-        className="quill-surface-card"
-        style={{
-          width: '100%',
-          maxWidth: '580px',
-          backgroundColor: '#FFFDFA',
-          border: '1px solid var(--color-border)',
-          borderRadius: 'var(--radius-lg)',
-          boxShadow: 'var(--shadow-lg)',
-          overflow: 'hidden',
-          display: 'flex',
-          flexDirection: 'column',
-          maxHeight: '75vh',
-          animation: 'fadeIn var(--transition-fast)'
-        }}
+        className="quill-command-modal-dialog"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search Input Bar */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            padding: 'var(--space-3) var(--space-4)',
-            borderBottom: '1px solid var(--color-border-subtle)',
-            gap: 'var(--space-3)'
-          }}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--color-text-muted)' }}>
-            <circle cx="11" cy="11" r="8" />
-            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        <div className="quill-command-search-header">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/>
           </svg>
 
           <input
@@ -256,44 +340,17 @@ export default function CommandPaletteModal({ isOpen, onClose, onNavigate }) {
               setQuery(e.target.value);
               setSelectedIndex(0);
             }}
-            placeholder="Search commands, topics, or essays..."
-            style={{
-              flex: 1,
-              border: 'none',
-              outline: 'none',
-              background: 'transparent',
-              fontSize: '1rem',
-              color: 'var(--color-text-primary)',
-              fontFamily: 'inherit'
-            }}
+            placeholder="Type a command, essay, collection, or atmosphere..."
+            className="quill-command-search-input"
           />
 
-          <kbd
-            style={{
-              fontSize: '0.72rem',
-              padding: '2px 6px',
-              borderRadius: '4px',
-              backgroundColor: 'var(--color-surface-secondary)',
-              border: '1px solid var(--color-border)',
-              color: 'var(--color-text-muted)',
-              fontFamily: 'inherit'
-            }}
-          >
-            Esc
+          <kbd className="quill-cmd-kbd" style={{ cursor: 'pointer' }} onClick={onClose}>
+            ESC
           </kbd>
         </div>
 
         {/* Command Items List */}
-        <div
-          ref={listRef}
-          style={{
-            overflowY: 'auto',
-            padding: 'var(--space-2)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '2px'
-          }}
-        >
+        <div ref={listRef} className="quill-command-list">
           {commands.length === 0 ? (
             <div style={{ padding: 'var(--space-8) var(--space-4)', textAlign: 'center', color: 'var(--color-text-muted)' }}>
               <p style={{ fontSize: '0.9rem', margin: 0 }}>No matching commands or essays found for "{query}".</p>
@@ -310,29 +367,18 @@ export default function CommandPaletteModal({ isOpen, onClose, onNavigate }) {
                     onClose();
                   }}
                   onMouseEnter={() => setSelectedIndex(idx)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 'var(--space-3)',
-                    padding: 'var(--space-2) var(--space-3)',
-                    borderRadius: 'var(--radius-md)',
-                    border: 'none',
-                    textAlign: 'left',
-                    width: '100%',
-                    cursor: 'pointer',
-                    backgroundColor: isSelected ? 'var(--color-surface-secondary)' : 'transparent',
-                    borderLeft: isSelected ? '3px solid var(--color-accent)' : '3px solid transparent',
-                    transition: 'background-color var(--transition-fast)'
-                  }}
+                  className={`quill-command-item ${isSelected ? 'selected' : ''}`}
                 >
-                  <span style={{ fontSize: '1.1rem', flexShrink: 0 }}>{cmd.icon}</span>
+                  <div className="quill-command-item-icon-box">
+                    <CommandIcon type={cmd.iconType} />
+                  </div>
 
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--space-2)' }}>
-                      <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--color-text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--color-text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {cmd.title}
                       </span>
-                      <span style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      <span style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
                         {cmd.category}
                       </span>
                     </div>
@@ -360,10 +406,10 @@ export default function CommandPaletteModal({ isOpen, onClose, onNavigate }) {
           }}
         >
           <div style={{ display: 'flex', gap: 'var(--space-3)' }}>
-            <span><kbd>↑</kbd> <kbd>↓</kbd> navigate</span>
-            <span><kbd>↵</kbd> select</span>
+            <span><kbd className="quill-cmd-kbd">↑</kbd> <kbd className="quill-cmd-kbd">↓</kbd> navigate</span>
+            <span><kbd className="quill-cmd-kbd">↵</kbd> select</span>
           </div>
-          <span>Quill Fast Navigation</span>
+          <span>Quill Command Center</span>
         </div>
       </div>
     </div>

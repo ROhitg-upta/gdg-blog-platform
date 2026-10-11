@@ -123,6 +123,8 @@ export default function CommunityHeader({
               setSearchFocused(false);
             }}
             placeholder="Search stories, topics, or writers..."
+            shortcut="⌘K"
+            onShortcutClick={onOpenCommandPalette}
           />
 
           {/* Search Suggestions Popover */}
@@ -234,56 +236,37 @@ export default function CommunityHeader({
         </div>
 
         {/* Right: Command Palette, Write action & Reader Avatar Menu */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+        <div className="quill-header-actions">
           {/* Quick Command Palette Button */}
           {onOpenCommandPalette && (
             <button
               type="button"
               onClick={onOpenCommandPalette}
-              className="quill-btn quill-btn-secondary"
-              style={{
-                padding: '0.35rem 0.65rem',
-                minHeight: '34px',
-                fontSize: '0.78rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                color: 'var(--color-text-secondary)'
-              }}
+              className="quill-command-btn"
               title="Command Palette (Ctrl+K or ⌘K)"
               aria-label="Open command palette"
             >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="11" cy="11" r="8" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
-              <span className="command-palette-hint-text">Commands</span>
-              <kbd
-                style={{
-                  fontSize: '0.68rem',
-                  padding: '1px 4px',
-                  borderRadius: '3px',
-                  backgroundColor: 'var(--color-surface-secondary)',
-                  border: '1px solid var(--color-border)',
-                  fontFamily: 'inherit'
-                }}
-              >
-                ⌘K
-              </kbd>
+              <span className="quill-cmd-icon" aria-hidden="true">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/>
+                </svg>
+              </span>
+              <span className="quill-cmd-label">Commands</span>
+              <kbd className="quill-cmd-kbd">⌘K</kbd>
             </button>
           )}
 
           <button
             type="button"
             onClick={() => onNavigate('/write')}
-            className="quill-btn quill-btn-primary"
-            style={{ padding: '0.45rem 1rem', minHeight: '36px', fontSize: '0.86rem' }}
+            className="quill-header-write-btn"
+            aria-label="Write a story"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 20h9" />
               <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
             </svg>
-            <span>Write a story</span>
+            <span className="quill-write-label">Write a story</span>
           </button>
 
           {/* Reader Profile Menu */}
