@@ -586,8 +586,8 @@ export default function CommunityPage({ onNavigate, initialRoute = '/community',
           )}
         </main>
 
-        {/* Right Community Rail (~280px) */}
-        <div className="quill-dashboard-rail" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-8)' }}>
+        {/* Right Community Rail (~288px) */}
+        <aside className="quill-dashboard-rail" style={{ gap: 'var(--space-6)' }}>
           <CommunityRightRail
             onSelectStory={(story) => setSelectedStory(story)}
             onSelectTopic={(topic) => setSelectedTopic(topic)}
@@ -598,7 +598,7 @@ export default function CommunityPage({ onNavigate, initialRoute = '/community',
             onNavigate={onNavigate}
             showToast={showToast}
           />
-        </div>
+        </aside>
       </div>
 
       {/* Mobile Navigation Drawer Modal */}

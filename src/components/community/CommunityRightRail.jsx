@@ -23,9 +23,9 @@ export default function CommunityRightRail({
   const TOPIC_PILLS = ['Technology', 'Design', 'AI', 'Personal Growth', 'Culture'];
 
   return (
-    <aside aria-label="Community highlights and recommendations" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-8)' }}>
+    <div aria-label="Community highlights and recommendations" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
       {/* 1. Community Picks */}
-      <div>
+      <div style={{ borderBottom: '1px solid var(--color-border-subtle)', paddingBottom: 'var(--space-6)' }}>
         <span className="quill-section-label">Community Picks</span>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
           {COMMUNITY_PICKS.map((pick, index) => (
@@ -62,7 +62,7 @@ export default function CommunityRightRail({
       </div>
 
       {/* 2. Explore Topics */}
-      <div>
+      <div style={{ borderBottom: '1px solid var(--color-border-subtle)', paddingBottom: 'var(--space-6)' }}>
         <span className="quill-section-label">Explore Topics</span>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
           {TOPIC_PILLS.map((topic) => (
@@ -79,10 +79,10 @@ export default function CommunityRightRail({
       </div>
 
       {/* 3. Writers to Follow */}
-      <div>
+      <div style={{ borderBottom: '1px solid var(--color-border-subtle)', paddingBottom: 'var(--space-6)' }}>
         <span className="quill-section-label">Writers to Follow</span>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)', marginTop: 'var(--space-3)' }}>
-          {WRITERS.slice(0, 4).map((writer) => {
+          {WRITERS.slice(0, 3).map((writer) => {
             const following = isFollowing(writer.id);
             return (
               <div
@@ -145,38 +145,47 @@ export default function CommunityRightRail({
         </div>
       </div>
 
-      {/* 4. Weekly Writing Prompt Card */}
+      {/* 4. Bottom Writing Invitation */}
       <div
         className="quill-surface-card"
         style={{
           padding: 'var(--space-5)',
-          backgroundColor: '#FFFDFA',
-          border: '1px solid var(--color-border)'
+          backgroundColor: 'var(--color-accent-soft, #F8E4D9)',
+          border: '1px solid var(--color-border)',
+          borderRadius: 'var(--radius-md)'
         }}
       >
-        <span style={{ fontSize: '0.74rem', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600, color: 'var(--color-accent)' }}>
-          {WEEKLY_PROMPT.theme}
-        </span>
-        <p
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', marginBottom: 'var(--space-2)' }}>
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="var(--color-accent)" aria-hidden="true">
+            <path d="M8 0L9.4 6.6L16 8L9.4 9.4L8 16L6.6 9.4L0 8L6.6 6.6L8 0Z" />
+          </svg>
+          <span style={{ fontSize: '0.74rem', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600, color: 'var(--color-accent)' }}>
+            For Writers
+          </span>
+        </div>
+        <h4
           className="font-serif"
           style={{
-            fontSize: '1.05rem',
-            lineHeight: 1.45,
+            fontSize: '1.08rem',
+            lineHeight: 1.4,
             color: 'var(--color-text-primary)',
-            margin: 'var(--space-2) 0 var(--space-4) 0'
+            margin: '0 0 var(--space-2) 0'
           }}
         >
-          “{WEEKLY_PROMPT.question}”
+          Your perspective belongs here.
+        </h4>
+        <p style={{ fontSize: '0.82rem', color: 'var(--color-text-secondary)', lineHeight: 1.45, marginBottom: 'var(--space-4)' }}>
+          Share an essay, observation, or craft insight with thoughtful readers.
         </p>
         <button
           type="button"
           onClick={() => onNavigate('/write')}
           className="quill-btn quill-btn-secondary"
-          style={{ width: '100%', minHeight: '34px', fontSize: '0.82rem', padding: '0.35rem 0.85rem' }}
+          style={{ width: '100%', minHeight: '34px', fontSize: '0.82rem', padding: '0.35rem 0.85rem', backgroundColor: '#FFFDFA' }}
         >
-          {WEEKLY_PROMPT.actionText} →
+          Write your first story →
         </button>
       </div>
-    </aside>
+    </div>
   );
 }

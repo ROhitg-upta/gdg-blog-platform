@@ -433,6 +433,11 @@
   flex-shrink: 0;
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.quill-feed-story:hover .quill-feed-story-artwork {
+  border-color: var(--color-border-strong);
 }
 
 .quill-feed-story-artwork svg,

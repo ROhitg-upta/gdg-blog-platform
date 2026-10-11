@@ -114,7 +114,10 @@
 
   --container-max-width: 1440px;
   --feed-max-width: 740px;
-  --header-height: 72px;
+  --header-height: 68px;
+  --dashboard-sticky-gap: 1.5rem;
+  --dashboard-rail-top: calc(var(--header-height) + var(--dashboard-sticky-gap));
+  --dashboard-rail-height: calc(100vh - var(--dashboard-rail-top) - 1.5rem);
 
   /* --------------------------------------------------------------------------
      4. SHAPES & CORNERS

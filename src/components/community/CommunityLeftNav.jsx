@@ -7,7 +7,9 @@ export default function CommunityLeftNav({
   onSelectTopic,
   onNavigate
 }) {
-  const { bookmarks } = useReader();
+  const { bookmarks, userStories } = useReader();
+
+  const activeDraft = (userStories || []).find((s) => s.status === 'draft');
 
   const TOPIC_LIST = [
     'Technology',
@@ -18,7 +20,16 @@ export default function CommunityLeftNav({
   ];
 
   return (
-    <nav aria-label="Community navigation" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
+    <nav
+      aria-label="Community navigation"
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '100%',
+        height: '100%',
+        gap: 'var(--space-6)'
+      }}
+    >
       {/* Primary Navigation Links */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
         <button
@@ -138,31 +149,78 @@ export default function CommunityLeftNav({
         </div>
       </div>
 
-      {/* Bottom Writing Invitation Box */}
-      <div
-        className="quill-surface-card"
-        style={{
-          marginTop: 'var(--space-4)',
-          padding: 'var(--space-4)',
-          backgroundColor: 'var(--color-surface-secondary)',
-          border: '1px solid var(--color-border)'
-        }}
-      >
-        <span style={{ fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600, color: 'var(--color-accent)' }}>
-          Write on Quill
-        </span>
-        <p style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', margin: 'var(--space-1) 0 var(--space-3) 0', lineHeight: 1.45 }}>
-          Have something to share? Your perspective belongs here.
-        </p>
-        <button
-          type="button"
-          onClick={() => onNavigate('/write')}
-          className="quill-btn quill-btn-secondary"
-          style={{ width: '100%', minHeight: '34px', fontSize: '0.82rem', padding: '0.35rem 0.75rem' }}
+      {/* Flexible Spacer for Anchoring */}
+      <div style={{ flex: '1 1 auto', minHeight: 'var(--space-4)' }} />
+
+      {/* Bottom Writing Invitation / Active Draft Card */}
+      {activeDraft ? (
+        <div
+          className="quill-surface-card"
+          style={{
+            marginTop: 'auto',
+            padding: 'var(--space-4)',
+            backgroundColor: 'var(--color-surface-secondary)',
+            border: '1px solid var(--color-border)',
+            borderRadius: 'var(--radius-md)'
+          }}
         >
-          Start drafting →
-        </button>
-      </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', marginBottom: 'var(--space-1)' }}>
+            <span style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600, color: 'var(--color-accent)' }}>
+              Continue your draft
+            </span>
+            <span style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: 'var(--color-accent)' }} />
+          </div>
+          <h4
+            className="font-serif"
+            style={{
+              fontSize: '0.92rem',
+              color: 'var(--color-text-primary)',
+              margin: '2px 0 var(--space-2) 0',
+              lineHeight: 1.35,
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden'
+            }}
+          >
+            {activeDraft.title || 'Untitled draft'}
+          </h4>
+          <button
+            type="button"
+            onClick={() => onNavigate(`/write/${activeDraft.id}/edit`)}
+            className="quill-btn quill-btn-secondary"
+            style={{ width: '100%', minHeight: '32px', fontSize: '0.78rem', padding: '0.35rem 0.75rem' }}
+          >
+            Resume writing →
+          </button>
+        </div>
+      ) : (
+        <div
+          className="quill-surface-card"
+          style={{
+            marginTop: 'auto',
+            padding: 'var(--space-4)',
+            backgroundColor: 'var(--color-surface-secondary)',
+            border: '1px solid var(--color-border)',
+            borderRadius: 'var(--radius-md)'
+          }}
+        >
+          <span style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600, color: 'var(--color-accent)' }}>
+            Something on your mind?
+          </span>
+          <p style={{ fontSize: '0.84rem', color: 'var(--color-text-secondary)', margin: 'var(--space-1) 0 var(--space-3) 0', lineHeight: 1.45 }}>
+            Give it a first paragraph.
+          </p>
+          <button
+            type="button"
+            onClick={() => onNavigate('/write')}
+            className="quill-btn quill-btn-secondary"
+            style={{ width: '100%', minHeight: '32px', fontSize: '0.78rem', padding: '0.35rem 0.75rem' }}
+          >
+            Write a story →
+          </button>
+        </div>
+      )}
     </nav>
   );
 }

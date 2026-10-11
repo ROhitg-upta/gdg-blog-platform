@@ -7,11 +7,23 @@
 :root {
   --sidebar-width: 220px;
   --sidebar-compact-width: 64px;
-  --right-rail-width: 280px;
+  --right-rail-width: 288px;
   --gutter-desktop: 2rem;
   --gutter-mobile: 1.25rem;
   --reading-column-width: 680px;
   --card-padding: 1.5rem;
+
+  /* Sticky Rails Geometry */
+  --header-height: 68px;
+  --dashboard-sticky-gap: 1.5rem;
+  --dashboard-rail-top: calc(var(--header-height) + var(--dashboard-sticky-gap));
+  --dashboard-rail-height: calc(100vh - var(--dashboard-rail-top) - 1.5rem);
+}
+
+@supports (height: 100dvh) {
+  :root {
+    --dashboard-rail-height: calc(100dvh - var(--dashboard-rail-top) - 1.5rem);
+  }
 }
 
 /* Universal Reset */
@@ -231,14 +243,52 @@ img, svg {
   max-width: var(--container-max-width);
   margin: 0 auto;
   padding: var(--space-6) var(--gutter-desktop);
+  align-items: start;
+}
+
+/* Sticky Rails Shells (Intentional Viewport-Height Architecture) */
+.quill-dashboard-sidebar,
+.quill-dashboard-rail {
+  align-self: start;
+  position: sticky;
+  top: var(--dashboard-rail-top);
+  max-height: var(--dashboard-rail-height);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+  -webkit-overflow-scrolling: touch;
+}
+
+.quill-dashboard-sidebar::-webkit-scrollbar,
+.quill-dashboard-rail::-webkit-scrollbar {
+  width: 4px;
+}
+
+.quill-dashboard-sidebar::-webkit-scrollbar-track,
+.quill-dashboard-rail::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.quill-dashboard-sidebar::-webkit-scrollbar-thumb,
+.quill-dashboard-rail::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+.quill-dashboard-sidebar::-webkit-scrollbar-thumb:hover,
+.quill-dashboard-rail::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-strong);
 }
 
 @media (max-width: 1180px) {
   .quill-dashboard-layout {
-    grid-template-columns: var(--sidebar-compact-width) minmax(0, 1fr);
+    grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
   }
   .quill-dashboard-rail {
-    display: none;
+    display: none !important;
   }
   .quill-dashboard-main {
     grid-column: auto !important;
@@ -251,8 +301,13 @@ img, svg {
     padding: var(--space-4) var(--gutter-mobile);
     gap: var(--space-4);
   }
-  .quill-dashboard-sidebar {
-    display: none;
+  .quill-dashboard-sidebar,
+  .quill-dashboard-rail {
+    display: none !important;
+    position: static !important;
+    max-height: none !important;
+    height: auto !important;
+    overflow: visible !important;
   }
   .quill-dashboard-main {
     grid-column: 1 / -1 !important;
