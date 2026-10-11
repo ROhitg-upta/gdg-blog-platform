@@ -3,34 +3,92 @@ import CommunityHeader from '../components/community/CommunityHeader';
 import CommunityLeftNav from '../components/community/CommunityLeftNav';
 import StoryArtworkRenderer from '../components/editorial/StoryArtworkRenderer';
 import StoryPreviewModal from '../components/editorial/StoryPreviewModal';
-import { getAllHydratedStories } from '../data/communityData';
+import Modal from '../components/ui/Modal';
+import ConfirmDialog from '../components/ui/ConfirmDialog';
 import { useReader } from '../hooks/useReader';
 import { Toast, ToastContainer } from '../components/ui/Toast';
 
 export default function BookmarksPage({ onNavigate }) {
-  const { bookmarks, toggleBookmark, toasts, dismissToast, allPublishedStories } = useReader();
+  const {
+    bookmarks,
+    toggleBookmark,
+    bookmarkCollections,
+    createShelf,
+    deleteShelf,
+    toggleStoryInShelf,
+    toasts,
+    dismissToast,
+    showToast,
+    allPublishedStories
+  } = useReader();
+
+  const [activeShelfId, setActiveShelfId] = useState('all'); // 'all' | shelfId
   const [selectedStory, setSelectedStory] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // New Shelf Modal state
+  const [newShelfModalOpen, setNewShelfModalOpen] = useState(false);
+  const [newShelfName, setNewShelfName] = useState('');
+  const [newShelfDesc, setNewShelfDesc] = useState('');
+
+  // Delete shelf state
+  const [shelfToDelete, setShelfToDelete] = useState(null);
+
+  // Organize story in shelves modal
+  const [organizeStory, setOrganizeStory] = useState(null);
+
   const allStories = allPublishedStories || [];
 
-  // Filter bookmarked stories
-  const bookmarkedStories = useMemo(() => {
-    return allStories.filter((story) => bookmarks.includes(story.id));
-  }, [allStories, bookmarks]);
+  // Active collection object if custom shelf selected
+  const activeCustomShelf = useMemo(() => {
+    if (activeShelfId === 'all') return null;
+    return bookmarkCollections.find((c) => c.id === activeShelfId) || null;
+  }, [activeShelfId, bookmarkCollections]);
 
-  // Optional search query inside bookmarks
-  const filteredBookmarkedStories = useMemo(() => {
-    if (!searchQuery.trim()) return bookmarkedStories;
+  // Base list of stories for current shelf
+  const currentShelfStories = useMemo(() => {
+    if (activeShelfId === 'all') {
+      return allStories.filter((story) => bookmarks.includes(story.id));
+    }
+    if (activeCustomShelf) {
+      return allStories.filter((story) => (activeCustomShelf.storyIds || []).includes(story.id));
+    }
+    return [];
+  }, [allStories, bookmarks, activeShelfId, activeCustomShelf]);
+
+  // Optional search query inside current shelf
+  const filteredStories = useMemo(() => {
+    if (!searchQuery.trim()) return currentShelfStories;
     const q = searchQuery.toLowerCase().trim();
-    return bookmarkedStories.filter((s) =>
+    return currentShelfStories.filter((s) =>
       (s.title || '').toLowerCase().includes(q) ||
       (s.excerpt || s.subtitle || '').toLowerCase().includes(q) ||
       (s.author?.name || 'Reader').toLowerCase().includes(q) ||
       (s.topic || '').toLowerCase().includes(q)
     );
-  }, [bookmarkedStories, searchQuery]);
+  }, [currentShelfStories, searchQuery]);
+
+  const handleCreateShelf = (e) => {
+    e.preventDefault();
+    if (!newShelfName.trim()) return;
+
+    const created = createShelf(newShelfName, newShelfDesc);
+    if (created) {
+      setNewShelfModalOpen(false);
+      setNewShelfName('');
+      setNewShelfDesc('');
+      setActiveShelfId(created.id);
+    }
+  };
+
+  const handleConfirmDeleteShelf = () => {
+    if (shelfToDelete) {
+      deleteShelf(shelfToDelete.id);
+      setActiveShelfId('all');
+      setShelfToDelete(null);
+    }
+  };
 
   return (
     <div className="quill-app-shell" style={{ backgroundColor: 'var(--color-paper, #F8F5EE)', minHeight: '100vh' }}>
@@ -62,26 +120,112 @@ export default function BookmarksPage({ onNavigate }) {
 
         {/* Bookmarks Stream */}
         <main className="quill-dashboard-main" style={{ minWidth: 0, gridColumn: 'span 2' }}>
+          {/* Header Banner */}
           <div style={{ marginBottom: 'var(--space-6)' }}>
             <span className="text-eyebrow" style={{ color: 'var(--color-accent)' }}>
-              Reading Shelf
+              Personal Reading Desk
             </span>
             <h1 className="font-serif text-h1" style={{ color: 'var(--color-text-primary)', marginTop: 'var(--space-1)', marginBottom: 'var(--space-2)' }}>
-              Your Saved Bookmarks
+              Reading Shelves
             </h1>
             <p className="text-body" style={{ color: 'var(--color-text-secondary)' }}>
-              Essays and stories saved for focused contemplation.
+              Organize essays and reflections into custom personal collections.
             </p>
           </div>
 
-          {filteredBookmarkedStories.length > 0 ? (
+          {/* Shelves Tabs Navigation */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              borderBottom: '1px solid var(--color-border)',
+              marginBottom: 'var(--space-6)',
+              overflowX: 'auto',
+              gap: 'var(--space-4)'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+              <button
+                type="button"
+                onClick={() => setActiveShelfId('all')}
+                className={`quill-tab-btn ${activeShelfId === 'all' ? 'active' : ''}`}
+                style={{ padding: '0.5rem 0.9rem', fontSize: '0.88rem' }}
+              >
+                All Saved ({bookmarks.length})
+              </button>
+
+              {bookmarkCollections.map((col) => {
+                const isSelected = activeShelfId === col.id;
+                return (
+                  <button
+                    key={col.id}
+                    type="button"
+                    onClick={() => setActiveShelfId(col.id)}
+                    className={`quill-tab-btn ${isSelected ? 'active' : ''}`}
+                    style={{ padding: '0.5rem 0.9rem', fontSize: '0.88rem' }}
+                  >
+                    {col.name} ({(col.storyIds || []).length})
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setNewShelfModalOpen(true)}
+              className="quill-btn quill-btn-secondary"
+              style={{ padding: '0.3rem 0.75rem', fontSize: '0.8rem', minHeight: '30px', flexShrink: 0 }}
+            >
+              + New shelf
+            </button>
+          </div>
+
+          {/* Active Shelf Metadata Banner (if viewing a custom shelf) */}
+          {activeCustomShelf && (
+            <div
+              style={{
+                padding: 'var(--space-4) var(--space-5)',
+                backgroundColor: 'var(--color-surface-secondary)',
+                borderRadius: 'var(--radius-md)',
+                marginBottom: 'var(--space-6)',
+                border: '1px solid var(--color-border)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: 'var(--space-3)'
+              }}
+            >
+              <div>
+                <h3 className="font-serif" style={{ fontSize: '1.2rem', color: 'var(--color-text-primary)', margin: '0 0 2px 0' }}>
+                  {activeCustomShelf.name}
+                </h3>
+                <p style={{ fontSize: '0.84rem', color: 'var(--color-text-secondary)', margin: 0 }}>
+                  {activeCustomShelf.description || 'Personal reading shelf in this browser.'}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShelfToDelete(activeCustomShelf)}
+                className="quill-btn-text"
+                style={{ fontSize: '0.78rem', color: 'var(--color-error)' }}
+              >
+                Delete this shelf
+              </button>
+            </div>
+          )}
+
+          {/* Stories List */}
+          {filteredStories.length > 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              {filteredBookmarkedStories.map((story) => (
+              {filteredStories.map((story) => (
                 <article key={story.id} className="quill-feed-story">
                   <div className="quill-feed-story-content">
                     <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
                       <span style={{ fontWeight: 600, color: 'var(--color-text-secondary)' }}>
-                        {story.author.name}
+                        {story.author?.name || 'Reader'}
                       </span>
                       <span>·</span>
                       <span>{story.date}</span>
@@ -106,13 +250,13 @@ export default function BookmarksPage({ onNavigate }) {
                     </h3>
 
                     <p className="quill-feed-story-excerpt">
-                      {story.excerpt}
+                      {story.excerpt || story.subtitle}
                     </p>
 
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'var(--space-2)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'var(--space-3)', flexWrap: 'wrap', gap: 'var(--space-2)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
                         <span style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)' }}>
-                          {story.readingTime}
+                          {story.readingTime || story.readTime}
                         </span>
                         <button
                           type="button"
@@ -132,33 +276,50 @@ export default function BookmarksPage({ onNavigate }) {
                         </button>
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={() => toggleBookmark(story.id, story.title)}
-                        className="quill-btn quill-btn-secondary"
-                        style={{
-                          padding: '0.35rem 0.8rem',
-                          minHeight: '30px',
-                          fontSize: '0.78rem',
-                          color: 'var(--color-accent)'
-                        }}
-                        aria-label={`Remove ${story.title} from bookmarks`}
-                      >
-                        Remove from shelf
-                      </button>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+                        <button
+                          type="button"
+                          onClick={() => setOrganizeStory(story)}
+                          className="quill-btn quill-btn-secondary"
+                          style={{
+                            padding: '0.3rem 0.75rem',
+                            minHeight: '28px',
+                            fontSize: '0.76rem'
+                          }}
+                        >
+                          Organize in shelves...
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => toggleBookmark(story.id, story.title)}
+                          className="quill-btn quill-btn-secondary"
+                          style={{
+                            padding: '0.3rem 0.75rem',
+                            minHeight: '28px',
+                            fontSize: '0.76rem',
+                            color: 'var(--color-accent)'
+                          }}
+                          aria-label={`Remove ${story.title} from bookmarks`}
+                        >
+                          Remove
+                        </button>
+                      </div>
                     </div>
                   </div>
 
-                  <div
-                    className="quill-feed-story-artwork"
-                    onClick={() => onNavigate(`/story/${story.slug}`)}
-                    style={{ cursor: 'pointer' }}
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`Read story: ${story.title}`}
-                  >
-                    <StoryArtworkRenderer artworkId={story.artworkId} />
-                  </div>
+                  {story.artworkId && (
+                    <div
+                      className="quill-feed-story-artwork"
+                      onClick={() => onNavigate(`/story/${story.slug}`)}
+                      style={{ cursor: 'pointer' }}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`Read story: ${story.title}`}
+                    >
+                      <StoryArtworkRenderer artworkId={story.artworkId} />
+                    </div>
+                  )}
                 </article>
               ))}
             </div>
@@ -171,11 +332,13 @@ export default function BookmarksPage({ onNavigate }) {
               </svg>
 
               <h3 className="quill-empty-title">
-                Your reading shelf is empty
+                {activeCustomShelf ? `"${activeCustomShelf.name}" is empty` : 'Your reading shelf is empty'}
               </h3>
 
               <p className="quill-empty-desc">
-                Save stories using the bookmark icon on any essay to build your personal reading list.
+                {activeCustomShelf
+                  ? 'Add stories to this custom shelf by clicking "Organize in shelves..." on any saved essay.'
+                  : 'Save stories using the bookmark icon on any essay to build your personal reading list.'}
               </p>
 
               <button
@@ -190,50 +353,149 @@ export default function BookmarksPage({ onNavigate }) {
         </main>
       </div>
 
-      {/* Mobile Drawer */}
-      {mobileMenuOpen && (
-        <div
-          className="quill-modal-overlay"
-          onClick={() => setMobileMenuOpen(false)}
-          style={{ justifyContent: 'flex-start', padding: 0 }}
-        >
-          <div
-            style={{
-              backgroundColor: '#FFFDFA',
-              width: '280px',
-              height: '100%',
-              padding: 'var(--space-6)',
-              boxShadow: 'var(--shadow-lg)'
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-6)' }}>
-              <span className="brand-wordmark" style={{ fontSize: '1.5rem' }}>
-                quill<span className="brand-dot">.</span>
-              </span>
-              <button
-                type="button"
-                onClick={() => setMobileMenuOpen(false)}
-                className="quill-icon-btn quill-icon-btn-compact"
-                aria-label="Close menu"
-              >
-                <svg width="16" height="16" viewBox="0 0 16 16" stroke="currentColor" strokeWidth="2">
-                  <line x1="3" y1="3" x2="13" y2="13" />
-                  <line x1="3" y1="13" x2="13" y2="3" />
-                </svg>
-              </button>
-            </div>
-
-            <CommunityLeftNav
-              activeRoute="/bookmarks"
-              onNavigate={(route) => {
-                setMobileMenuOpen(false);
-                onNavigate(route);
+      {/* Modal: Create New Shelf */}
+      <Modal
+        isOpen={newShelfModalOpen}
+        onClose={() => setNewShelfModalOpen(false)}
+        title="Create personal reading shelf"
+      >
+        <form onSubmit={handleCreateShelf} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '0.84rem', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: '4px' }}>
+              Shelf name *
+            </label>
+            <input
+              type="text"
+              value={newShelfName}
+              onChange={(e) => setNewShelfName(e.target.value)}
+              placeholder="e.g. Weekend reads, Design ideas, Deep focus"
+              required
+              style={{
+                width: '100%',
+                padding: 'var(--space-3)',
+                borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--color-border)',
+                backgroundColor: 'var(--color-surface-card)',
+                color: 'var(--color-text-primary)',
+                fontSize: '0.9rem'
               }}
             />
           </div>
-        </div>
+
+          <div>
+            <label style={{ display: 'block', fontSize: '0.84rem', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: '4px' }}>
+              Description (optional)
+            </label>
+            <textarea
+              value={newShelfDesc}
+              onChange={(e) => setNewShelfDesc(e.target.value)}
+              placeholder="A short note explaining what belongs in this collection..."
+              rows={3}
+              style={{
+                width: '100%',
+                padding: 'var(--space-3)',
+                borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--color-border)',
+                backgroundColor: 'var(--color-surface-card)',
+                color: 'var(--color-text-primary)',
+                fontSize: '0.9rem',
+                fontFamily: 'inherit'
+              }}
+            />
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--space-3)', marginTop: 'var(--space-2)' }}>
+            <button
+              type="button"
+              onClick={() => setNewShelfModalOpen(false)}
+              className="quill-btn quill-btn-secondary"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={!newShelfName.trim()}
+              className="quill-btn quill-btn-primary"
+            >
+              Create shelf
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Modal: Organize Story in Shelves */}
+      {organizeStory && (
+        <Modal
+          isOpen={Boolean(organizeStory)}
+          onClose={() => setOrganizeStory(null)}
+          title={`Organize "${organizeStory.title}"`}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+            <p style={{ fontSize: '0.86rem', color: 'var(--color-text-secondary)', margin: 0 }}>
+              Select which reading shelves this essay belongs to:
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+              {bookmarkCollections.map((shelf) => {
+                const isInShelf = (shelf.storyIds || []).includes(organizeStory.id);
+                return (
+                  <label
+                    key={shelf.id}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 'var(--space-3)',
+                      padding: 'var(--space-3)',
+                      backgroundColor: 'var(--color-surface-secondary)',
+                      borderRadius: 'var(--radius-sm)',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isInShelf}
+                      onChange={() => toggleStoryInShelf(shelf.id, organizeStory.id, organizeStory.title)}
+                      style={{ width: '16px', height: '16px', accentColor: 'var(--color-accent)' }}
+                    />
+                    <div>
+                      <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+                        {shelf.name}
+                      </div>
+                      {shelf.description && (
+                        <div style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)' }}>
+                          {shelf.description}
+                        </div>
+                      )}
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 'var(--space-3)' }}>
+              <button
+                type="button"
+                onClick={() => setOrganizeStory(null)}
+                className="quill-btn quill-btn-primary"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </Modal>
       )}
+
+      {/* Confirm Delete Shelf Dialog */}
+      <ConfirmDialog
+        isOpen={Boolean(shelfToDelete)}
+        title={`Delete shelf "${shelfToDelete?.name}"?`}
+        message="This will remove the collection shelf. The stories and bookmarks inside will not be deleted."
+        confirmLabel="Delete shelf"
+        cancelLabel="Keep shelf"
+        isDestructive={true}
+        onConfirm={handleConfirmDeleteShelf}
+        onCancel={() => setShelfToDelete(null)}
+      />
 
       {/* Story Preview Modal */}
       <StoryPreviewModal

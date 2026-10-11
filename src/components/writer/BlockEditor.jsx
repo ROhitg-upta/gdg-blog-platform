@@ -127,6 +127,7 @@ export default function BlockEditor({
             return (
               <div
                 key={index}
+                id={`editor-block-${index}`}
                 className="quill-editor-block"
                 style={{
                   backgroundColor: 'var(--color-surface-card, #FFFDFA)',

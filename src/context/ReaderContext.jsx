@@ -15,6 +15,28 @@ import {
   generateSlug,
   calculateReadingMetrics
 } from '../utils/storyStorage';
+import {
+  getStoredReactions,
+  toggleStoryReaction,
+  getStoredNotes,
+  saveNote,
+  deleteNote,
+  getStoredHighlights,
+  saveHighlight,
+  removeHighlight,
+  getReadingHistory,
+  updateReadingProgress,
+  removeReadingHistoryEntry,
+  clearReadingHistory,
+  getBookmarkCollections,
+  createBookmarkCollection,
+  updateBookmarkCollection,
+  deleteBookmarkCollection,
+  toggleStoryInCollection,
+  getProfilePreferences,
+  saveProfilePreferences,
+  cleanupStoryUserData
+} from '../utils/advancedStorage';
 
 const ReaderContext = createContext(null);
 
@@ -44,6 +66,83 @@ export function ReaderProvider({ children }) {
 
   // Ephemeral toast notification state
   const [toasts, setToasts] = useState([]);
+
+  // Profile preferences (accent, ambience, penName)
+  const [profilePreferences, setProfilePreferences] = useState(() => getProfilePreferences());
+
+  // Reactions map { [storyId]: 'applaud' | 'thoughtful' | 'inspiring' }
+  const [reactions, setReactions] = useState(() => getStoredReactions());
+
+  // Bookmark Shelves / Collections
+  const [bookmarkCollections, setBookmarkCollections] = useState(() => getBookmarkCollections());
+
+  // Reading history count / trigger state
+  const [readingHistoryUpdated, setReadingHistoryUpdated] = useState(Date.now());
+
+  // Apply accent and ambience to document element
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.setAttribute('data-accent', profilePreferences.accent || 'terracotta');
+      document.documentElement.setAttribute('data-ambience', profilePreferences.ambience || 'paper');
+    }
+  }, [profilePreferences.accent, profilePreferences.ambience]);
+
+  const updateProfilePreferences = useCallback((updates) => {
+    setProfilePreferences((prev) => {
+      const next = { ...prev, ...updates };
+      saveProfilePreferences(next);
+      return next;
+    });
+  }, []);
+
+  const toggleReaction = useCallback((storyId, reactionType = 'applaud') => {
+    const updated = toggleStoryReaction(storyId, reactionType);
+    setReactions(getStoredReactions());
+    return updated;
+  }, []);
+
+  const getReaction = useCallback((storyId) => {
+    return reactions[storyId] || null;
+  }, [reactions]);
+
+  const createShelf = useCallback((name, description = '') => {
+    const created = createBookmarkCollection(name, description);
+    if (created) {
+      setBookmarkCollections(getBookmarkCollections());
+      showToast(`Created shelf "${name}".`, 'success');
+    }
+    return created;
+  }, [showToast]);
+
+  const updateShelf = useCallback((id, updates) => {
+    updateBookmarkCollection(id, updates);
+    setBookmarkCollections(getBookmarkCollections());
+    showToast('Shelf updated.', 'info');
+  }, [showToast]);
+
+  const deleteShelf = useCallback((id) => {
+    deleteBookmarkCollection(id);
+    setBookmarkCollections(getBookmarkCollections());
+    showToast('Shelf removed.', 'info');
+  }, [showToast]);
+
+  const toggleStoryInShelf = useCallback((shelfId, storyId, storyTitle = '') => {
+    const isIn = toggleStoryInCollection(shelfId, storyId);
+    setBookmarkCollections(getBookmarkCollections());
+    const shelf = bookmarkCollections.find((c) => c.id === shelfId);
+    const shelfName = shelf ? shelf.name : 'shelf';
+    if (isIn) {
+      showToast(storyTitle ? `Added "${storyTitle}" to ${shelfName}.` : `Added to ${shelfName}.`, 'success');
+    } else {
+      showToast(storyTitle ? `Removed "${storyTitle}" from ${shelfName}.` : `Removed from ${shelfName}.`, 'info');
+    }
+    return isIn;
+  }, [bookmarkCollections, showToast]);
+
+  const recordReadingProgress = useCallback((storyId, slug, title, authorName, progress) => {
+    updateReadingProgress({ storyId, slug, title, authorName, progress });
+    setReadingHistoryUpdated(Date.now());
+  }, []);
 
   const showToast = useCallback((message, type = 'info') => {
     const id = Date.now() + Math.random().toString(36).substring(2, 6);
@@ -285,6 +384,11 @@ export function ReaderProvider({ children }) {
       return next;
     });
 
+    // Cascade cleanup of notes, versions, reactions, history, highlights, shelves
+    cleanupStoryUserData(storyId);
+    setReactions(getStoredReactions());
+    setBookmarkCollections(getBookmarkCollections());
+
     showToast('Story permanently removed from this device.', 'info');
   }, [showToast]);
 
@@ -373,6 +477,18 @@ export function ReaderProvider({ children }) {
     toasts,
     userStories,
     allPublishedStories,
+    reactions,
+    toggleReaction,
+    getReaction,
+    bookmarkCollections,
+    createShelf,
+    updateShelf,
+    deleteShelf,
+    toggleStoryInShelf,
+    profilePreferences,
+    updateProfilePreferences,
+    recordReadingProgress,
+    readingHistoryUpdated,
     showToast,
     dismissToast,
     enterAsReader,

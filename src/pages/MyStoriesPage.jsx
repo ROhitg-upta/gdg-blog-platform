@@ -4,6 +4,8 @@ import CommunityLeftNav from '../components/community/CommunityLeftNav';
 import StoryArtworkRenderer from '../components/editorial/StoryArtworkRenderer';
 import ConfirmDialog from '../components/ui/ConfirmDialog';
 import { useReader } from '../hooks/useReader';
+import { getStorySnapshots } from '../utils/advancedStorage';
+import { calculateReadingMetrics } from '../utils/storyStorage';
 import { Toast, ToastContainer } from '../components/ui/Toast';
 
 export default function MyStoriesPage({ onNavigate }) {
@@ -334,6 +336,8 @@ export default function MyStoriesPage({ onNavigate }) {
                   day: 'numeric',
                   year: 'numeric'
                 });
+                const snapshotCount = getStorySnapshots(story.id).length;
+                const metrics = calculateReadingMetrics(story.title, story.excerpt || story.subtitle, story.content);
 
                 return (
                   <article
@@ -386,10 +390,10 @@ export default function MyStoriesPage({ onNavigate }) {
                               borderRadius: 'var(--radius-pill)',
                               backgroundColor:
                                 story.status === 'published'
-                                  ? 'var(--color-success-soft)'
-                                  : story.status === 'archived'
-                                  ? 'var(--color-surface-secondary)'
-                                  : 'var(--color-warning-soft)',
+                                   ? 'var(--color-success-soft)'
+                                   : story.status === 'archived'
+                                   ? 'var(--color-surface-secondary)'
+                                   : 'var(--color-warning-soft)',
                               color:
                                 story.status === 'published'
                                   ? 'var(--color-success)'
@@ -402,7 +406,7 @@ export default function MyStoriesPage({ onNavigate }) {
                           </span>
 
                           <span style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', marginLeft: 'auto' }}>
-                            Updated {updatedDate} · {story.readTime || `${story.readingTime || 1} min read`}
+                            Updated {updatedDate} · {metrics.wordCount} words (~{metrics.readingTime} min read){snapshotCount > 0 && ` · ${snapshotCount} ${snapshotCount === 1 ? 'version' : 'versions'}`}
                           </span>
                         </div>
 
@@ -607,7 +611,7 @@ export default function MyStoriesPage({ onNavigate }) {
         onClose={() => setStoryToDelete(null)}
         onConfirm={handleDeleteConfirm}
         title={storyToDelete ? `Delete "${storyToDelete.title || 'Untitled Story'}"?` : 'Delete story?'}
-        description="This will permanently remove this story from your browser's local library. This action cannot be undone."
+        description="This will permanently remove this story and clean up all associated margin notes, highlights, reactions, and version snapshots from this browser. This action cannot be undone."
         confirmLabel="Permanently delete"
         cancelLabel="Keep story"
         destructive={true}

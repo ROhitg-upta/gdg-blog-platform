@@ -4,11 +4,14 @@ import CommunityLeftNav from '../components/community/CommunityLeftNav';
 import CommunityRightRail from '../components/community/CommunityRightRail';
 import StoryArtworkRenderer from '../components/editorial/StoryArtworkRenderer';
 import StoryPreviewModal from '../components/editorial/StoryPreviewModal';
+import ContinueReadingBanner from '../components/community/ContinueReadingBanner';
+import MoodSelector, { MOODS } from '../components/community/MoodSelector';
+import ReadingTrail from '../components/community/ReadingTrail';
 import { getAllHydratedStories, TOPICS } from '../data/communityData';
 import { useReader } from '../hooks/useReader';
 import { Toast, ToastContainer } from '../components/ui/Toast';
 
-export default function CommunityPage({ onNavigate, initialRoute = '/community' }) {
+export default function CommunityPage({ onNavigate, initialRoute = '/community', onOpenCommandPalette }) {
   const {
     bookmarks,
     followedWriterIds,
@@ -17,7 +20,9 @@ export default function CommunityPage({ onNavigate, initialRoute = '/community' 
     toasts,
     dismissToast,
     reader,
-    allPublishedStories
+    allPublishedStories,
+    readingHistoryUpdated,
+    showToast
   } = useReader();
 
   // Parse initial topic from URL query param if present
@@ -34,6 +39,8 @@ export default function CommunityPage({ onNavigate, initialRoute = '/community' 
 
   const [activeTab, setActiveTab] = useState('for-you'); // 'for-you' | 'following' | 'latest'
   const [searchQuery, setSearchQuery] = useState('');
+  const [readingDuration, setReadingDuration] = useState('all'); // 'all' | 'short' | 'medium' | 'long'
+  const [selectedMood, setSelectedMood] = useState(null);
   const [pageSize, setPageSize] = useState(5);
   const [selectedStory, setSelectedStory] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -49,10 +56,10 @@ export default function CommunityPage({ onNavigate, initialRoute = '/community' 
     return 'Good evening, reader.';
   }, []);
 
-  // Reset pagination when search, tab, or topic filter changes
+  // Reset pagination when search, tab, topic, duration, or mood filter changes
   useEffect(() => {
     setPageSize(5);
-  }, [searchQuery, activeTab, selectedTopic]);
+  }, [searchQuery, activeTab, selectedTopic, readingDuration, selectedMood]);
 
   // Sync topic from URL query params when location changes
   useEffect(() => {
@@ -65,7 +72,7 @@ export default function CommunityPage({ onNavigate, initialRoute = '/community' 
     }
   }, []);
 
-  // Filter and sort stories according to search, tab, and topic
+  // Filter and sort stories according to search, tab, topic, duration, and mood
   const filteredStories = useMemo(() => {
     return allStories.filter((story) => {
       // 1. Topic filter
@@ -73,19 +80,38 @@ export default function CommunityPage({ onNavigate, initialRoute = '/community' 
         return false;
       }
 
-      // 2. Tab filter
+      // 2. Mood filter
+      if (selectedMood) {
+        const moodObj = MOODS.find((m) => m.id === selectedMood);
+        if (moodObj && story.topic !== moodObj.topic) {
+          return false;
+        }
+      }
+
+      // 3. Tab filter
       if (activeTab === 'following') {
         if (!followedWriterIds.includes(story.authorId)) {
           return false;
         }
       }
 
-      // 3. Search filter
+      // 4. Reading duration filter
+      if (readingDuration !== 'all') {
+        const mins = typeof story.readingTime === 'number'
+          ? story.readingTime
+          : parseInt(story.readingTime || story.readTime || '5', 10) || 5;
+        if (readingDuration === 'short' && mins >= 5) return false;
+        if (readingDuration === 'medium' && (mins < 5 || mins > 10)) return false;
+        if (readingDuration === 'long' && mins <= 10) return false;
+      }
+
+      // 5. Search filter (fixed query variable!)
       if (searchQuery.trim()) {
-        const matchTitle = (story.title || '').toLowerCase().includes(query);
-        const matchExcerpt = (story.excerpt || story.subtitle || '').toLowerCase().includes(query);
-        const matchAuthor = (story.author?.name || 'Reader').toLowerCase().includes(query);
-        const matchTopic = (story.topic || '').toLowerCase().includes(query);
+        const q = searchQuery.toLowerCase().trim();
+        const matchTitle = (story.title || '').toLowerCase().includes(q);
+        const matchExcerpt = (story.excerpt || story.subtitle || '').toLowerCase().includes(q);
+        const matchAuthor = (story.author?.name || 'Reader').toLowerCase().includes(q);
+        const matchTopic = (story.topic || '').toLowerCase().includes(q);
         if (!matchTitle && !matchExcerpt && !matchAuthor && !matchTopic) {
           return false;
         }
@@ -99,7 +125,7 @@ export default function CommunityPage({ onNavigate, initialRoute = '/community' 
       }
       return 0; // Default curated order
     });
-  }, [allStories, selectedTopic, activeTab, followedWriterIds, searchQuery]);
+  }, [allStories, selectedTopic, selectedMood, activeTab, followedWriterIds, readingDuration, searchQuery]);
 
   // Paginated visible slice
   const visibleStories = useMemo(() => {
@@ -128,6 +154,8 @@ export default function CommunityPage({ onNavigate, initialRoute = '/community' 
     setSearchQuery('');
     setSelectedTopic('All topics');
     setActiveTab('for-you');
+    setReadingDuration('all');
+    setSelectedMood(null);
   };
 
   const isExplorePage = initialRoute === '/explore';
@@ -141,6 +169,7 @@ export default function CommunityPage({ onNavigate, initialRoute = '/community' 
         onSearchClear={() => setSearchQuery('')}
         onNavigate={onNavigate}
         onOpenMobileMenu={() => setMobileMenuOpen(true)}
+        onOpenCommandPalette={onOpenCommandPalette}
       />
 
       {/* 2. Responsive 3-Column Dashboard Body */}
@@ -164,6 +193,12 @@ export default function CommunityPage({ onNavigate, initialRoute = '/community' 
 
         {/* Central Editorial Feed */}
         <main className="quill-dashboard-main" style={{ minWidth: 0 }}>
+          {/* Continue Reading Banner (when incomplete story exists) */}
+          <ContinueReadingBanner
+            onNavigate={onNavigate}
+            readingHistoryUpdated={readingHistoryUpdated}
+          />
+
           {/* Greeting & Headline Section */}
           <div style={{ marginBottom: 'var(--space-6)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', marginBottom: 'var(--space-1)' }}>
@@ -183,6 +218,14 @@ export default function CommunityPage({ onNavigate, initialRoute = '/community' 
               Ideas, experiences, and voices worth your time.
             </p>
           </div>
+
+          {/* Curated Mood Selector (featured on Explore, or when filtering by mood) */}
+          {(isExplorePage || selectedMood) && (
+            <MoodSelector
+              selectedMood={selectedMood}
+              onSelectMood={(m) => setSelectedMood(m)}
+            />
+          )}
 
           {/* Feed Tabs: For you / Following / Latest */}
           <div className="quill-tab-list" role="tablist" aria-label="Feed segments" style={{ marginBottom: 'var(--space-5)' }}>
@@ -222,8 +265,8 @@ export default function CommunityPage({ onNavigate, initialRoute = '/community' 
               alignItems: 'center',
               gap: 'var(--space-2)',
               overflowX: 'auto',
-              paddingBottom: 'var(--space-4)',
-              marginBottom: 'var(--space-4)',
+              paddingBottom: 'var(--space-3)',
+              marginBottom: 'var(--space-3)',
               scrollbarWidth: 'none'
             }}
             role="toolbar"
@@ -241,6 +284,43 @@ export default function CommunityPage({ onNavigate, initialRoute = '/community' 
                   aria-pressed={isSelected}
                 >
                   {topic}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Reading-time filter chips */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--space-2)',
+              marginBottom: 'var(--space-5)',
+              flexWrap: 'wrap'
+            }}
+            role="toolbar"
+            aria-label="Filter stories by reading time"
+          >
+            <span style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginRight: '2px' }}>
+              Time:
+            </span>
+            {[
+              { id: 'all', label: 'Any duration' },
+              { id: 'short', label: '< 5 min' },
+              { id: 'medium', label: '5–10 min' },
+              { id: 'long', label: '10+ min' }
+            ].map((d) => {
+              const isSelected = readingDuration === d.id;
+              return (
+                <button
+                  key={d.id}
+                  type="button"
+                  onClick={() => setReadingDuration(d.id)}
+                  className={`quill-chip quill-chip-compact ${isSelected ? 'selected' : ''}`}
+                  style={{ fontSize: '0.75rem', padding: '0.15rem 0.55rem' }}
+                  aria-pressed={isSelected}
+                >
+                  {d.label}
                 </button>
               );
             })}
@@ -507,11 +587,16 @@ export default function CommunityPage({ onNavigate, initialRoute = '/community' 
         </main>
 
         {/* Right Community Rail (~280px) */}
-        <div className="quill-dashboard-rail">
+        <div className="quill-dashboard-rail" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-8)' }}>
           <CommunityRightRail
             onSelectStory={(story) => setSelectedStory(story)}
             onSelectTopic={(topic) => setSelectedTopic(topic)}
             onNavigate={onNavigate}
+          />
+
+          <ReadingTrail
+            onNavigate={onNavigate}
+            showToast={showToast}
           />
         </div>
       </div>

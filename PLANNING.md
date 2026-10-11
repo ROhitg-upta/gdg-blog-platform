@@ -12,32 +12,38 @@
 * **Unified Reading Experience:** Integrated bookmarking, topic filtering, clean typography scaling, and contextual comment discussions.
 
 ### Critical Architecture & Scope Paradigm
-* **No Public Landing Page:** In this phase of the product lifecycle, there is **no public marketing hero or promotional landing page**.
-* **Direct-to-Authentication Entry:** When the application boots, unauthenticated visitors are presented with the **Login** screen (`/login`).
-* **Authenticated Community Core:** Upon successful authentication, users enter the three-column **Community Home** dashboard (`/community`).
+* **Signature Warm Ivory Landing Page (`/`):** The application boots to the approved warm ivory editorial landing page featuring the *"Good stories. Unexpected perspectives."* headline, terracotta accent underline, topic strip, and 3-card mosaic.
+* **Zero-Credential Reader Flow:** Entering the platform requires **no passwords, no signups, no credential gates, and no login forms**. Visitors click **"Continue as reader"** to immediately access the platform.
+* **Community Editorial Core (`/community`):** A three-column light editorial dashboard with search, feed tabs, topic pills, curated picks, continue reading banner, and reading trail.
 
 ---
 
-## 2. Scope and Explicit Exclusions
+## 2. Scope and Architecture
 
-### In-Scope Modules (Phase 1 MVP)
+### In-Scope Modules
 
-#### A. Authentication Experience
-* **Entry Point:** Direct boot to the `/login` screen.
-* **Authentication Views:** Login, Account Registration (`/signup`), and Optional Reading Topic Onboarding (`/onboarding`).
-* **Session Lifecycle:** Frontend-managed session state with mock authentication validation, session token persistence across browser refreshes, and deterministic logout teardown.
-* **Route Protection:** Navigation guards shielding all dashboard, reading, profile, and writer routes against unauthenticated access.
+#### A. Entry Flow & Community Core
+* **Landing Page (`/`):** Warm ivory showcase with one-click "Continue as reader" entry.
+* **Community Dashboard (`/community`):** Three-column layout with search, dynamic feed tabs (*For you*, *Following*, *Latest*), topic chips, continue reading banner, and personal reading trail.
+* **Curated Collections (`/collections/:slug`):** Curated themed essay collections exploring deep themes like *The Craft of Attention* and *Architects of Quiet Minds*.
+* **Reading Shelves (`/bookmarks`):** Custom collection shelves, "+ New shelf" creation, and story organization dialogs.
+* **Personal Reading Room (`/profile`):** Reading pace & statistics, accent tone and ambiance customization, and honest JSON data backup.
+* **Global Command Palette (`⌘K` / `Ctrl+K`):** Fast, accessible fuzzy switcher across all routes, essays, and reading modes.
 
-#### B. Authenticated Community Dashboard
-* **Community Home (`/community`):** Three-column layout containing global navigation, a personalized central feed ("Your next great read"), dynamic tabs (*For you*, *Following*, *Latest*), and an exploration sidebar.
-* **Search & Topic Filtering:** Instant search against story titles, excerpts, author names, and topics, paired with multi-category chips (*Technology*, *Design*, *AI*, *Personal Growth*).
-* **Story Reader (`/story/:slug`):** Full-screen reading layout featuring estimated reading time, author card, styled block typography, bookmarking actions, and responsive comment feeds.
-* **Bookmarking Engine (`/bookmarks`):** Instant save/unsave actions synchronized with the user profile state.
-* **Writer Studio (`/write`, `/write/:id/edit`, `/write/:id/preview`):** Rich drafting interface with live word count, reading-time calculation, draft autosave status, client-side validation, and instant publication.
-* **Story Management (`/my-stories`):** Tabbed management console for Published Stories and Saved Drafts with edit, preview, and safe deletion confirmation dialogs.
+#### B. Reader Room Superpowers (`/story/:slug`)
+* **Text Selection Toolbar:** Floating selection menu for Highlighting, Private Margin Notes, and Copy Quote.
+* **Margin Notes Drawer:** Paragraph-anchored personal reflections side drawer.
+* **Reading Ambiences:** Instant switching between Paper (default ivory), Sepia (sunlit parchment), and Studio (cool gray).
+* **Story Contemplation Reactions & Local Responses:** Applaud, Thoughtful, and Inspiring reactions, alongside local reader responses with pen name attribution.
+* **Export & Print:** Copy full essay as clean Markdown and dedicated `@media print` styling.
 
-### Explicitly Excluded (Out of Scope)
-* **Public Marketing Landing Page:** No promotional marketing copy, public carousels, or unauthenticated teaser pages.
+#### C. Writer Studio Superpowers (`/write`)
+* **Document Outline Drawer:** Live semantic outline of all sections with click-to-jump.
+* **Version History Snapshots:** Automatic pre-publish snapshots, manual revisions with custom notes, read-only preview, and one-click rollback.
+* **Writing Goal Widget:** Session word target tracking with live progress bar and encouragement.
+* **Markdown Importer/Exporter:** Native browser parsing of `.md`/`.txt` files and JSON backup exports.
+* **Non-Judgmental Checklist:** 6-item progress checklist guiding writers without blocking.
+* **Cascading Deletion:** Deleting a story permanently cleans up its notes, highlights, reactions, versions, and shelf references without touching unrelated keys.
 * **Payment Gateways & Subscriptions:** No Stripe/PayPal integration, paid paywalls, or tipping systems.
 * **Real-time WebSockets / Direct Messaging:** No 1-on-1 private messaging or live socket feeds.
 * **Machine Learning Recommendation Engine:** Feeds use deterministic client-side filtering algorithms rather than remote vector recommendations.

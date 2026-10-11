@@ -7,6 +7,10 @@ import {
 } from '../utils/storyStorage';
 import CoverArtworkPicker from '../components/writer/CoverArtworkPicker';
 import BlockEditor from '../components/writer/BlockEditor';
+import WriterOutlineDrawer from '../components/writer/WriterOutlineDrawer';
+import VersionHistoryModal from '../components/writer/VersionHistoryModal';
+import WritingGoalWidget from '../components/writer/WritingGoalWidget';
+import { createStorySnapshot } from '../utils/advancedStorage';
 import { Toast, ToastContainer } from '../components/ui/Toast';
 
 const WRITING_TOPICS = [
@@ -50,6 +54,9 @@ export default function WriterStudioPage({ storyId = null, onNavigate }) {
   const [saveStatus, setSaveStatus] = useState('saved');
   const [errors, setErrors] = useState({});
   const [isPublishing, setIsPublishing] = useState(false);
+  const [outlineOpen, setOutlineOpen] = useState(false);
+  const [versionModalOpen, setVersionModalOpen] = useState(false);
+  const fileInputRef = useRef(null);
 
   // Debounce timer ref
   const autosaveTimerRef = useRef(null);
@@ -77,7 +84,7 @@ export default function WriterStudioPage({ storyId = null, onNavigate }) {
     );
   }, [story.title, story.excerpt, story.subtitle, story.content]);
 
-  // Checklist status
+  // Non-judgmental checklist status
   const checklist = useMemo(() => {
     const hasTitle = Boolean(story.title && story.title.trim().length > 0);
     const hasExcerpt = Boolean((story.excerpt || story.subtitle) && (story.excerpt || story.subtitle).trim().length > 0);
@@ -96,6 +103,13 @@ export default function WriterStudioPage({ storyId = null, onNavigate }) {
         return false;
       })
     );
+    const hasHeading = Boolean(
+      Array.isArray(story.content) &&
+      story.content.some((b) => b && b.type === 'heading' && b.text && b.text.trim().length > 0)
+    );
+
+    const items = [hasTitle, hasExcerpt, hasTopic, hasCover, hasContent, hasHeading];
+    const completedCount = items.filter(Boolean).length;
 
     return {
       hasTitle,
@@ -103,6 +117,9 @@ export default function WriterStudioPage({ storyId = null, onNavigate }) {
       hasTopic,
       hasCover,
       hasContent,
+      hasHeading,
+      completedCount,
+      totalCount: 6,
       isComplete: hasTitle && hasExcerpt && hasTopic && hasCover && hasContent
     };
   }, [story]);
@@ -186,17 +203,188 @@ export default function WriterStudioPage({ storyId = null, onNavigate }) {
       clearTimeout(autosaveTimerRef.current);
     }
     performSave(story);
-    showToast('Draft saved locally.', 'info');
+    createStorySnapshot(story, 'Manual save snapshot');
+    showToast('Draft and snapshot saved locally.', 'info');
   };
 
-  // Publish handler
+  // Restore snapshot handler
+  const handleRestoreVersion = (snapshot) => {
+    if (!snapshot) return;
+    const restoredUpdates = {
+      title: snapshot.title || '',
+      subtitle: snapshot.subtitle || '',
+      excerpt: snapshot.subtitle || '',
+      content: Array.isArray(snapshot.content) ? snapshot.content : [],
+      topic: snapshot.topic || 'Writing',
+      artworkId: snapshot.artworkId || 'portal'
+    };
+    updateStoryFields(restoredUpdates);
+    performSave({ ...story, ...restoredUpdates });
+  };
+
+  // Outline handlers
+  const handleAddHeadingBlock = () => {
+    const newBlock = { type: 'heading', text: 'New Section' };
+    const content = Array.isArray(story.content) ? [...story.content, newBlock] : [newBlock];
+    updateStoryFields({ content });
+    showToast('Section heading added.', 'info');
+  };
+
+  const handleScrollToBlock = (index) => {
+    const el = document.querySelectorAll('.quill-block-item')[index];
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
+  // Export handlers
+  const handleExportMarkdown = () => {
+    let md = `# ${story.title || 'Untitled'}\n\n`;
+    if (story.excerpt || story.subtitle) {
+      md += `*${story.excerpt || story.subtitle}*\n\n`;
+    }
+    md += `**Topic:** ${story.topic || 'Writing'}  \n`;
+    md += `**Date:** ${new Date().toLocaleDateString()}  \n\n---\n\n`;
+
+    if (Array.isArray(story.content)) {
+      story.content.forEach((b) => {
+        if (typeof b === 'string') {
+          md += `${b}\n\n`;
+        } else if (b && b.type === 'heading') {
+          md += `## ${b.text}\n\n`;
+        } else if (b && b.type === 'quote') {
+          md += `> “${b.text}”\n`;
+          if (b.attribution) md += `> — ${b.attribution}\n`;
+          md += `\n`;
+        } else if (b && b.type === 'list' && Array.isArray(b.items)) {
+          b.items.forEach((item) => {
+            md += `- ${item}\n`;
+          });
+          md += `\n`;
+        } else if (b && b.type === 'paragraph') {
+          md += `${b.text}\n\n`;
+        }
+      });
+    }
+
+    const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${story.slug || 'story-draft'}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Draft exported as Markdown file.', 'success');
+  };
+
+  const handleExportJson = () => {
+    const jsonStr = JSON.stringify(story, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${story.slug || 'story-draft'}-backup.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Draft exported as JSON backup.', 'success');
+  };
+
+  // Import Markdown file handler
+  const handleImportMarkdown = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.endsWith('.md') && !file.name.endsWith('.txt')) {
+      showToast('Please select a .md or .txt Markdown file.', 'warning');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const text = event.target?.result;
+        if (typeof text !== 'string') return;
+
+        const lines = text.split(/\r?\n/);
+        const parsedBlocks = [];
+        let detectedTitle = '';
+        let detectedSubtitle = '';
+        let currentPara = [];
+
+        const flushPara = () => {
+          if (currentPara.length > 0) {
+            parsedBlocks.push({
+              type: 'paragraph',
+              text: currentPara.join(' ').trim()
+            });
+            currentPara = [];
+          }
+        };
+
+        lines.forEach((line) => {
+          const trimmed = line.trim();
+          if (!trimmed) {
+            flushPara();
+            return;
+          }
+
+          if (trimmed.startsWith('# ') && !detectedTitle) {
+            flushPara();
+            detectedTitle = trimmed.replace(/^#\s*/, '').trim();
+          } else if (trimmed.startsWith('## ') || trimmed.startsWith('# ')) {
+            flushPara();
+            parsedBlocks.push({
+              type: 'heading',
+              text: trimmed.replace(/^#+\s*/, '').trim()
+            });
+          } else if (trimmed.startsWith('> ')) {
+            flushPara();
+            parsedBlocks.push({
+              type: 'quote',
+              text: trimmed.replace(/^>\s*/, '').replace(/^[“"']|[”"']$/g, '').trim(),
+              attribution: ''
+            });
+          } else if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+            flushPara();
+            parsedBlocks.push({
+              type: 'list',
+              items: [trimmed.replace(/^[-*]\s*/, '').trim()]
+            });
+          } else {
+            currentPara.push(trimmed);
+          }
+        });
+        flushPara();
+
+        const updates = {};
+        if (detectedTitle && !story.title) {
+          updates.title = detectedTitle;
+        }
+        if (parsedBlocks.length > 0) {
+          updates.content = parsedBlocks;
+        }
+
+        updateStoryFields(updates);
+        performSave({ ...story, ...updates });
+        showToast('Imported Markdown into story draft.', 'success');
+      } catch (err) {
+        console.warn('Import error:', err);
+        showToast('Unable to parse Markdown file.', 'error');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
+  // Publish handler with auto-snapshot
   const handlePublish = () => {
     if (autosaveTimerRef.current) {
       clearTimeout(autosaveTimerRef.current);
     }
 
-    // Save current draft first
+    // Save current draft and take snapshot
     performSave(story);
+    createStorySnapshot(story, 'Auto snapshot before publishing');
 
     setIsPublishing(true);
     const result = publishStory(story.id);
@@ -344,13 +532,94 @@ export default function WriterStudioPage({ storyId = null, onNavigate }) {
           </span>
         </div>
 
-        {/* Right: Studio Actions (Save Draft, Preview, Publish) */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+        {/* Right: Studio Actions (Save Draft, Preview, Outline, History, Export/Import, Publish) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
+          {/* Hidden Markdown file input */}
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleImportMarkdown}
+            accept=".md,.txt"
+            style={{ display: 'none' }}
+          />
+
+          {/* Outline Button */}
+          <button
+            type="button"
+            onClick={() => setOutlineOpen(true)}
+            className="quill-btn quill-btn-ghost"
+            title="Document Outline"
+            aria-label="Document Outline"
+            style={{ fontSize: '0.82rem', padding: '0.4rem 0.65rem', minHeight: '36px', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <line x1="8" y1="6" x2="21" y2="6"></line>
+              <line x1="8" y1="12" x2="21" y2="12"></line>
+              <line x1="8" y1="18" x2="21" y2="18"></line>
+              <line x1="3" y1="6" x2="3.01" y2="6"></line>
+              <line x1="3" y1="12" x2="3.01" y2="12"></line>
+              <line x1="3" y1="18" x2="3.01" y2="18"></line>
+            </svg>
+            <span>Outline</span>
+          </button>
+
+          {/* History Button */}
+          <button
+            type="button"
+            onClick={() => setVersionModalOpen(true)}
+            className="quill-btn quill-btn-ghost"
+            title="Version Snapshots"
+            aria-label="Version Snapshots"
+            style={{ fontSize: '0.82rem', padding: '0.4rem 0.65rem', minHeight: '36px', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span>History</span>
+          </button>
+
+          {/* Markdown / JSON Export / Import buttons */}
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="quill-btn quill-btn-ghost"
+            title="Import Markdown (.md)"
+            aria-label="Import Markdown"
+            style={{ fontSize: '0.8rem', padding: '0.4rem 0.6rem', minHeight: '36px' }}
+          >
+            Import .md
+          </button>
+
+          <button
+            type="button"
+            onClick={handleExportMarkdown}
+            className="quill-btn quill-btn-ghost"
+            title="Export Markdown (.md)"
+            aria-label="Export Markdown"
+            style={{ fontSize: '0.8rem', padding: '0.4rem 0.6rem', minHeight: '36px' }}
+          >
+            Export .md
+          </button>
+
+          <button
+            type="button"
+            onClick={handleExportJson}
+            className="quill-btn quill-btn-ghost"
+            title="Export JSON backup"
+            aria-label="Export JSON"
+            style={{ fontSize: '0.8rem', padding: '0.4rem 0.6rem', minHeight: '36px' }}
+          >
+            Export .json
+          </button>
+
+          <div style={{ height: '18px', width: '1px', backgroundColor: 'var(--color-border)', margin: '0 0.15rem' }} />
+
           <button
             type="button"
             onClick={handleManualSave}
             className="quill-btn quill-btn-secondary"
-            style={{ fontSize: '0.85rem', padding: '0.45rem 1rem', minHeight: '38px' }}
+            style={{ fontSize: '0.85rem', padding: '0.45rem 0.9rem', minHeight: '36px' }}
           >
             Save draft
           </button>
@@ -362,7 +631,7 @@ export default function WriterStudioPage({ storyId = null, onNavigate }) {
               onNavigate(`/write/${story.id}/preview`);
             }}
             className="quill-btn quill-btn-secondary"
-            style={{ fontSize: '0.85rem', padding: '0.45rem 1rem', minHeight: '38px' }}
+            style={{ fontSize: '0.85rem', padding: '0.45rem 0.9rem', minHeight: '36px' }}
           >
             Preview
           </button>
@@ -372,7 +641,7 @@ export default function WriterStudioPage({ storyId = null, onNavigate }) {
             onClick={handlePublish}
             disabled={isPublishing}
             className="quill-btn quill-btn-primary"
-            style={{ fontSize: '0.85rem', padding: '0.45rem 1.25rem', minHeight: '38px' }}
+            style={{ fontSize: '0.85rem', padding: '0.45rem 1.25rem', minHeight: '36px' }}
           >
             {isPublishing ? 'Publishing…' : isPublished ? 'Save & Update' : 'Publish story'}
           </button>
@@ -590,7 +859,7 @@ export default function WriterStudioPage({ storyId = null, onNavigate }) {
           </div>
         </main>
 
-        {/* Quiet Side Panel (Checklist & Editorial Tips) */}
+        {/* Quiet Side Panel (Checklist, Goal & Editorial Tips) */}
         <aside
           className="quill-studio-aside"
           style={{
@@ -601,6 +870,9 @@ export default function WriterStudioPage({ storyId = null, onNavigate }) {
             top: 'calc(var(--header-height, 68px) + var(--space-4))'
           }}
         >
+          {/* Writing Session Goal */}
+          <WritingGoalWidget currentWordCount={metrics.wordCount} />
+
           {/* Story Completeness Checklist */}
           <div
             style={{
@@ -611,19 +883,32 @@ export default function WriterStudioPage({ storyId = null, onNavigate }) {
               boxShadow: '0 1px 4px rgba(30, 28, 26, 0.03)'
             }}
           >
-            <span
-              style={{
-                display: 'block',
-                fontSize: '0.78rem',
-                fontWeight: 600,
-                color: 'var(--color-text-secondary)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                marginBottom: 'var(--space-3)'
-              }}
-            >
-              Story Checklist
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-2)' }}>
+              <span
+                style={{
+                  fontSize: '0.78rem',
+                  fontWeight: 600,
+                  color: 'var(--color-text-secondary)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}
+              >
+                Story Checklist
+              </span>
+              <span
+                style={{
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  color: checklist.completedCount === checklist.totalCount ? 'var(--color-success, #3E8A54)' : 'var(--color-accent, #D85A35)'
+                }}
+              >
+                {checklist.completedCount}/{checklist.totalCount}
+              </span>
+            </div>
+
+            <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginBottom: 'var(--space-3)', lineHeight: 1.4 }}>
+              Your draft is taking shape ({checklist.completedCount}/{checklist.totalCount} items complete)
+            </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', fontSize: '0.85rem' }}>
@@ -670,6 +955,15 @@ export default function WriterStudioPage({ storyId = null, onNavigate }) {
                   Body content
                 </span>
               </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', fontSize: '0.85rem' }}>
+                <span style={{ color: checklist.hasHeading ? 'var(--color-success)' : 'var(--color-text-muted)' }}>
+                  {checklist.hasHeading ? '✓' : '○'}
+                </span>
+                <span style={{ color: checklist.hasHeading ? 'var(--color-text-primary)' : 'var(--color-text-secondary)' }}>
+                  Section heading
+                </span>
+              </div>
             </div>
           </div>
 
@@ -703,6 +997,25 @@ export default function WriterStudioPage({ storyId = null, onNavigate }) {
           </div>
         </aside>
       </div>
+
+      {/* Document Outline Drawer */}
+      <WriterOutlineDrawer
+        isOpen={outlineOpen}
+        onClose={() => setOutlineOpen(false)}
+        title={story.title}
+        blocks={story.content || []}
+        onSelectBlock={handleScrollToBlock}
+        onAddHeading={handleAddHeadingBlock}
+      />
+
+      {/* Version History Modal */}
+      <VersionHistoryModal
+        isOpen={versionModalOpen}
+        onClose={() => setVersionModalOpen(false)}
+        story={story}
+        onRestoreVersion={handleRestoreVersion}
+        showToast={showToast}
+      />
 
       <ToastContainer>
         {toasts.map((toast) => (

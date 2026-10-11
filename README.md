@@ -59,21 +59,22 @@
 
 ---
 
-## 🏛️ Application Architecture & Routes
-
 | Route | Surface Type | Description | Key Interactions |
 | :--- | :--- | :--- | :--- |
 | `/` | **Landing Page** | Approved warm ivory editorial showcase | Wordmark, headline, story mosaic, topic strip, "Continue as reader" |
-| `/community` | **Community Dashboard** | 3-column light editorial workspace | Search, tabs (*For you*, *Following*, *Latest*), topic pills, story previews |
-| `/story/:slug` | **Full Story Reader** | Dedicated editorial reading room | Reading progress, typography controls (size/width/spacing), share, bookmark, related stories |
-| `/explore` | **Explore Stream** | Topic-first curated discovery | Deep search, topic browsing, reader preview modal |
-| `/bookmarks` | **Reading Shelf** | Saved stories repository | View saved essays, remove from shelf, instant count badges |
-| `/write` | **Writer Studio** | Distraction-free composition desk | Title, excerpt, topic, cover chooser, block editor, autosave, publish |
-| `/write/:id/edit` | **Story Editor** | Edit existing draft or published work | Update content blocks, modify cover/topic, debounced local autosave |
+| `/community` | **Community Dashboard** | 3-column light editorial workspace | Search, tabs (*For you*, *Following*, *Latest*), topic pills, story previews, continue reading banner, reading trail |
+| `/story/:slug` | **Full Story Reader** | Dedicated editorial reading room | Reading progress, highlight toolbar, margin notes drawer, ambiences (Paper/Sepia/Studio), reactions, responses, print, markdown export |
+| `/explore` | **Explore Stream** | Topic & mood-first curated discovery | Deep search, 5 reading moods, duration filters (<5m, 5–10m, 10+m), topic browsing |
+| `/collections/:slug` | **Curated Collections** | Themed editorial essay collections | 5 curated collections (e.g. *The Craft of Attention*), collection rationale, essays list |
+| `/bookmarks` | **Reading Shelves** | Saved stories & custom collections | Filter by custom shelves, create new shelf modal, organize story in shelf dialog, instant badges |
+| `/write` | **Writer Studio** | Distraction-free composition desk | Document outline drawer, version snapshots, writing goal widget, import/export Markdown/JSON, 6-item checklist |
+| `/write/:id/edit` | **Story Editor** | Edit existing draft or published work | Update content blocks, modify cover/topic, debounced local autosave, snapshot restore |
 | `/write/:id/preview` | **Story Preview** | Author editorial preview room | Verify typography & formatting, publish directly or return to editing |
-| `/my-stories` | **My Stories Library** | Personal story management console | Filter & manage Drafts, Published, and Archived stories, safe confirmed delete |
+| `/my-stories` | **My Stories Library** | Personal story management console | Filter & manage Drafts, Published, and Archived stories, version counts, metrics, cascading deletion |
+| `/profile` | **Reading Room** | Personal reader space & preferences | Reading habits stats, accent color selector, ambience preview, reading trail, complete JSON backup export |
 | `/design-system` | **Design System** | Internal component preview | Audit tokens, buttons, inputs, modals, toasts, and artwork |
 | `/login`, `/signup` | **Legacy Fallback** | Deprecated auth routes | Safely redirects with `replaceState` back to `/` |
+| `⌘K` / `Ctrl+K` | **Command Palette** | Global accessible quick switcher | Fuzzy search all routes, essays, and reading ambiences |
 
 ---
 

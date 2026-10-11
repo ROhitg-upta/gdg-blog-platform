@@ -1,14 +1,19 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import StoryReaderHeader from '../components/editorial/StoryReaderHeader';
 import ArticleContentRenderer from '../components/editorial/ArticleContentRenderer';
 import StoryArtworkRenderer from '../components/editorial/StoryArtworkRenderer';
 import RelatedStories from '../components/editorial/RelatedStories';
 import StoryUnavailable from '../components/editorial/StoryUnavailable';
+import HighlightToolbar from '../components/editorial/HighlightToolbar';
+import MarginNotesDrawer from '../components/editorial/MarginNotesDrawer';
+import StoryReactions from '../components/editorial/StoryReactions';
+import StoryResponses from '../components/editorial/StoryResponses';
 import Avatar from '../components/ui/Avatar';
 import { Toast, ToastContainer } from '../components/ui/Toast';
 import { getStoryBySlug, getRelatedStories } from '../data/communityData';
 import { useReader } from '../hooks/useReader';
 import { useReaderPreferences } from '../hooks/useReaderPreferences';
+import { getStoredNotes, saveHighlight } from '../utils/advancedStorage';
 
 export default function StoryReaderPage({ slug, onNavigate }) {
   const {
@@ -21,7 +26,8 @@ export default function StoryReaderPage({ slug, onNavigate }) {
     dismissToast,
     showToast,
     findStoryBySlug,
-    getUnifiedRelatedStories
+    getUnifiedRelatedStories,
+    recordReadingProgress
   } = useReader();
   const { preferences, setTextSize, setReadingWidth, setLineSpacing, resetPreferences } = useReaderPreferences();
 
@@ -32,6 +38,18 @@ export default function StoryReaderPage({ slug, onNavigate }) {
     }
     return getStoryBySlug(slug);
   }, [slug, findStoryBySlug]);
+
+  // Notes drawer state
+  const [notesDrawerOpen, setNotesDrawerOpen] = useState(false);
+  const [initialNoteQuote, setInitialNoteQuote] = useState('');
+  const [notesCount, setNotesCount] = useState(0);
+
+  // Update notes count when drawer opens/closes or story changes
+  useEffect(() => {
+    if (story) {
+      setNotesCount(getStoredNotes(story.id).length);
+    }
+  }, [story, notesDrawerOpen]);
 
   // Related stories across unified collection
   const relatedStories = useMemo(() => {
@@ -78,10 +96,84 @@ export default function StoryReaderPage({ slug, onNavigate }) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [story]);
 
+  // Record reading progress in browser-local history
+  useEffect(() => {
+    if (!story || scrollProgress === 0) return;
+    const timer = setTimeout(() => {
+      recordReadingProgress?.(
+        story.id,
+        story.slug,
+        story.title,
+        story.author?.name || 'Quill Writer',
+        scrollProgress
+      );
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [story, scrollProgress, recordReadingProgress]);
+
   // Scroll to top upon navigating to a new story
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [slug]);
+
+  // Handlers for reader superpowers
+  const handlePrint = useCallback(() => {
+    window.print();
+  }, []);
+
+  const handleCopyMarkdown = useCallback(() => {
+    if (!story) return;
+    let md = `# ${story.title || 'Untitled'}\n\n`;
+    if (story.subtitle || story.excerpt) {
+      md += `*${story.subtitle || story.excerpt}*\n\n`;
+    }
+    md += `**Author:** ${story.author?.name || 'Reader'}  \n`;
+    md += `**Published:** ${story.date || new Date().toLocaleDateString()}  \n`;
+    md += `**Topic:** ${story.topic || 'General'}  \n\n---\n\n`;
+
+    if (Array.isArray(story.content)) {
+      story.content.forEach((block) => {
+        if (typeof block === 'string') {
+          md += `${block}\n\n`;
+        } else if (block && block.type === 'heading') {
+          md += `## ${block.text}\n\n`;
+        } else if (block && block.type === 'quote') {
+          md += `> “${block.text}”\n`;
+          if (block.attribution) md += `> — *${block.attribution}*\n`;
+          md += `\n`;
+        } else if (block && block.type === 'list' && Array.isArray(block.items)) {
+          block.items.forEach((item) => {
+            md += `- ${item}\n`;
+          });
+          md += `\n`;
+        } else if (block && block.type === 'paragraph') {
+          md += `${block.text}\n\n`;
+        }
+      });
+    }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard
+        .writeText(md)
+        .then(() => {
+          showToast('Article copied as Markdown.', 'success');
+        })
+        .catch(() => {
+          showToast('Failed copying markdown to clipboard.', 'error');
+        });
+    }
+  }, [story, showToast]);
+
+  const handleHighlight = useCallback((text) => {
+    if (!story) return;
+    saveHighlight({ storyId: story.id, text, color: 'terracotta' });
+    showToast('Quote highlighted and saved to your desk.', 'success');
+  }, [story, showToast]);
+
+  const handleAddNoteFromQuote = useCallback((text) => {
+    setInitialNoteQuote(text);
+    setNotesDrawerOpen(true);
+  }, []);
 
   if (!story) {
     return (
@@ -119,11 +211,23 @@ export default function StoryReaderPage({ slug, onNavigate }) {
         story={story}
         progress={scrollProgress}
         preferences={preferences}
+        notesCount={notesCount}
+        onOpenNotes={() => setNotesDrawerOpen(true)}
+        onPrint={handlePrint}
+        onCopyMarkdown={handleCopyMarkdown}
         onTextSizeChange={setTextSize}
         onReadingWidthChange={setReadingWidth}
         onLineSpacingChange={setLineSpacing}
         onResetPreferences={resetPreferences}
         onNavigate={onNavigate}
+      />
+
+      {/* Floating Selection Toolbar */}
+      <HighlightToolbar
+        story={story}
+        onHighlight={handleHighlight}
+        onAddNoteFromQuote={handleAddNoteFromQuote}
+        showToast={showToast}
       />
 
       {/* 2. Main Article Reading Room */}
@@ -339,6 +443,18 @@ export default function StoryReaderPage({ slug, onNavigate }) {
             </button>
           </div>
 
+          {/* Reader Contemplation Reactions */}
+          <StoryReactions
+            storyId={story.id}
+            showToast={showToast}
+          />
+
+          {/* Reader Local Responses */}
+          <StoryResponses
+            storyId={story.id}
+            showToast={showToast}
+          />
+
           {/* 4. Related Stories ("Continue wandering") */}
           <RelatedStories
             stories={relatedStories}
@@ -346,6 +462,17 @@ export default function StoryReaderPage({ slug, onNavigate }) {
           />
         </article>
       </main>
+
+      {/* Private Margin Notes Drawer */}
+      <MarginNotesDrawer
+        isOpen={notesDrawerOpen}
+        onClose={() => setNotesDrawerOpen(false)}
+        storyId={story.id}
+        storyTitle={story.title}
+        initialQuote={initialNoteQuote}
+        onClearInitialQuote={() => setInitialNoteQuote('')}
+        showToast={showToast}
+      />
 
       {/* Toast Feedback */}
       <ToastContainer>

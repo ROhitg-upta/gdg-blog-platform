@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { useReader } from '../../hooks/useReader';
 
 export default function ReaderSettingsPopover({
   isOpen,
@@ -9,6 +10,7 @@ export default function ReaderSettingsPopover({
   onLineSpacingChange,
   onReset
 }) {
+  const { profilePreferences, updateProfilePreferences } = useReader();
   const popoverRef = useRef(null);
 
   useEffect(() => {
@@ -142,7 +144,7 @@ export default function ReaderSettingsPopover({
       </div>
 
       {/* 3. Line Spacing */}
-      <div>
+      <div style={{ marginBottom: 'var(--space-4)' }}>
         <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginBottom: 'var(--space-2)', fontWeight: 500 }}>
           Line Spacing
         </label>
@@ -168,6 +170,43 @@ export default function ReaderSettingsPopover({
                   fontWeight: isSelected ? 600 : 400
                 }}
                 aria-pressed={isSelected}
+              >
+                {option.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 4. Reading Ambience (Light-Only Editorial Palettes) */}
+      <div>
+        <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginBottom: 'var(--space-2)', fontWeight: 500 }}>
+          Reading Ambience
+        </label>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px' }}>
+          {[
+            { id: 'paper', label: 'Paper', bg: '#F8F5EE' },
+            { id: 'sepia', label: 'Sepia', bg: '#F3ECE1' },
+            { id: 'studio', label: 'Studio', bg: '#F1F3F5' }
+          ].map((option) => {
+            const isSelected = (profilePreferences?.ambience || 'paper') === option.id;
+            return (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => updateProfilePreferences && updateProfilePreferences({ ambience: option.id })}
+                className={`quill-btn quill-btn-secondary ${isSelected ? 'active' : ''}`}
+                style={{
+                  padding: '0.35rem 0.2rem',
+                  minHeight: '34px',
+                  fontSize: '0.76rem',
+                  borderColor: isSelected ? 'var(--color-accent)' : 'var(--color-border)',
+                  backgroundColor: isSelected ? 'var(--color-accent-soft)' : option.bg,
+                  color: isSelected ? 'var(--color-accent)' : 'var(--color-text-primary)',
+                  fontWeight: isSelected ? 600 : 400
+                }}
+                aria-pressed={isSelected}
+                title={`${option.label} ambience`}
               >
                 {option.label}
               </button>
