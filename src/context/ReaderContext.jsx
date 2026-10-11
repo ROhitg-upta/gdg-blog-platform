@@ -67,6 +67,18 @@ export function ReaderProvider({ children }) {
   // Ephemeral toast notification state
   const [toasts, setToasts] = useState([]);
 
+  const showToast = useCallback((message, type = 'info') => {
+    const id = Date.now() + Math.random().toString(36).substring(2, 6);
+    setToasts((prev) => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 3200);
+  }, []);
+
+  const dismissToast = useCallback((id) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
+
   // Profile preferences (accent, ambience, penName)
   const [profilePreferences, setProfilePreferences] = useState(() => getProfilePreferences());
 
@@ -82,10 +94,10 @@ export function ReaderProvider({ children }) {
   // Apply accent and ambience to document element
   useEffect(() => {
     if (typeof document !== 'undefined') {
-      document.documentElement.setAttribute('data-accent', profilePreferences.accent || 'terracotta');
-      document.documentElement.setAttribute('data-ambience', profilePreferences.ambience || 'paper');
+      document.documentElement.setAttribute('data-accent', profilePreferences?.accent || 'terracotta');
+      document.documentElement.setAttribute('data-ambience', profilePreferences?.ambience || 'paper');
     }
-  }, [profilePreferences.accent, profilePreferences.ambience]);
+  }, [profilePreferences?.accent, profilePreferences?.ambience]);
 
   const updateProfilePreferences = useCallback((updates) => {
     setProfilePreferences((prev) => {
@@ -142,18 +154,6 @@ export function ReaderProvider({ children }) {
   const recordReadingProgress = useCallback((storyId, slug, title, authorName, progress) => {
     updateReadingProgress({ storyId, slug, title, authorName, progress });
     setReadingHistoryUpdated(Date.now());
-  }, []);
-
-  const showToast = useCallback((message, type = 'info') => {
-    const id = Date.now() + Math.random().toString(36).substring(2, 6);
-    setToasts((prev) => [...prev, { id, message, type }]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 3200);
-  }, []);
-
-  const dismissToast = useCallback((id) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
   // Enter as reader (one-click entry action)

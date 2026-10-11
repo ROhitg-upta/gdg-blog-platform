@@ -13,10 +13,108 @@ import DesignSystemPreview from './pages/DesignSystemPreview';
 import NotFoundPage from './pages/NotFoundPage';
 import CommandPaletteModal from './components/navigation/CommandPaletteModal';
 
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('[Quill ErrorBoundary caught]:', error, errorInfo);
+  }
+
+  handleReset = () => {
+    try {
+      localStorage.clear();
+    } catch (e) {}
+    window.location.href = '/';
+  };
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div
+          style={{
+            minHeight: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#F8F5EE',
+            color: '#1E1C1A',
+            padding: '2rem',
+            textAlign: 'center',
+            fontFamily: 'Inter, system-ui, sans-serif'
+          }}
+        >
+          <div style={{ fontSize: '2.5rem', marginBottom: '1rem', color: '#D85A35' }}>✦</div>
+          <h1 style={{ fontFamily: 'Fraunces, serif', fontSize: '1.75rem', marginBottom: '0.75rem' }}>
+            A quiet pause in the margins.
+          </h1>
+          <p style={{ color: '#5A554E', maxWidth: '440px', lineHeight: 1.5, marginBottom: '1.5rem', fontSize: '0.95rem' }}>
+            An unexpected error occurred while loading this view. You can reload the page or clear your local session cache.
+          </p>
+          <div style={{ display: 'flex', gap: '0.75rem' }}>
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              style={{
+                backgroundColor: '#D85A35',
+                color: '#FFFFFF',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '0.6rem 1.25rem',
+                fontSize: '0.9rem',
+                fontWeight: 500,
+                cursor: 'pointer'
+              }}
+            >
+              Reload Page
+            </button>
+            <button
+              type="button"
+              onClick={this.handleReset}
+              style={{
+                backgroundColor: 'transparent',
+                color: '#1E1C1A',
+                border: '1px solid #DDD4C7',
+                borderRadius: '8px',
+                padding: '0.6rem 1.25rem',
+                fontSize: '0.9rem',
+                fontWeight: 500,
+                cursor: 'pointer'
+              }}
+            >
+              Reset Session
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+function normalizePath(rawPath) {
+  if (!rawPath) return '/';
+  let path = rawPath;
+  // If hosted on GitHub Pages or custom repo subfolder, strip prefix
+  path = path.replace(/^\/gdg-blog-platform(?:\/|$)/i, '/');
+  // Strip trailing slashes (except root)
+  if (path.length > 1 && path.endsWith('/')) {
+    path = path.slice(0, -1);
+  }
+  return path || '/';
+}
+
 function AppRouter() {
   const [currentPath, setCurrentPath] = useState(() => {
     if (typeof window !== 'undefined') {
-      return window.location.pathname || '/';
+      return normalizePath(window.location.pathname);
     }
     return '/';
   });
@@ -25,7 +123,7 @@ function AppRouter() {
   // Sync navigation on browser back/forward buttons
   useEffect(() => {
     const handlePopState = () => {
-      setCurrentPath(window.location.pathname || '/');
+      setCurrentPath(normalizePath(window.location.pathname));
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
@@ -44,26 +142,27 @@ function AppRouter() {
   }, []);
 
   const navigate = (path, replace = false) => {
+    const [pathname] = path.split('?');
+    const clean = normalizePath(pathname);
     if (replace) {
       window.history.replaceState({}, '', path);
     } else {
       window.history.pushState({}, '', path);
     }
-    // Extract pathname in case path includes query parameters like /community?topic=Design
-    const [pathname] = path.split('?');
-    setCurrentPath(pathname);
+    setCurrentPath(clean);
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
-  const renderCurrentPage = () => {
-    // Legacy authentication routes: redirect with replace to '/'
+  // Safe redirect for legacy authentication routes
+  useEffect(() => {
     if (currentPath === '/login' || currentPath === '/signup' || currentPath === '/onboarding') {
       navigate('/', true);
-      return <LandingPage onNavigate={navigate} />;
     }
+  }, [currentPath]);
 
+  const renderCurrentPage = () => {
     // 1. Root route: ALWAYS renders approved warm ivory editorial landing page
-    if (currentPath === '/') {
+    if (currentPath === '/' || currentPath === '/login' || currentPath === '/signup' || currentPath === '/onboarding') {
       return <LandingPage onNavigate={navigate} />;
     }
 
@@ -161,8 +260,10 @@ function AppRouter() {
 
 export default function App() {
   return (
-    <ReaderProvider>
-      <AppRouter />
-    </ReaderProvider>
+    <ErrorBoundary>
+      <ReaderProvider>
+        <AppRouter />
+      </ReaderProvider>
+    </ErrorBoundary>
   );
 }
